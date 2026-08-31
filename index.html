@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="google" content="notranslate">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>社康健康经营看板</title>
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@600;700;900&family=Noto+Sans+SC:wght@400;500;600;700&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.6.0/dist/echarts.min.js" integrity="sha384-pPi0zxBAoDu6+JXW/C68UZLvBUUtU+7zonhif43rqj7pxsGyqyqzcian2Rj37Rss" crossorigin="anonymous"></script>
+<style>
+:root{
+  --bg:#F3F5F1;
+  --panel:#FFFFFF;
+  --line:#E1E7DF;
+  --line2:#EDF1EB;
+  --ink:#16251F;
+  --ink2:#57675F;
+  --ink3:#8A9891;
+  --brand:#0E7C6B;
+  --brand2:#1F9A86;
+  --st1:#61BEAD;   /* 触达 */
+  --st2:#2A9D8F;   /* 体验 */
+  --st3:#0E5B51;   /* 订阅 */
+  --sub1:#2A9D8F;  /* 门诊 */
+  --sub2:#3D7EAA;  /* 社区活动 */
+  --sub3:#D99A3D;  /* 企业活动 */
+  --sub4:#8A9A93;  /* 自行拓展 */
+  --ok:#2E8B57; --warn:#C98A1B; --bad:#C25E4C;
+  --shadow:0 1px 0 rgba(22,37,31,.04);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--ink);font-family:"Noto Sans SC",-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;font-size:14px;line-height:1.55}
+body{padding-bottom:64px}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+.serif{font-family:"Noto Serif SC","Songti SC","SimSun",serif}
+a{color:inherit;text-decoration:none}
+
+.wrap{max-width:1560px;margin:0 auto;padding:0 28px}
+
+/* ===== 顶栏 ===== */
+.topbar{background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+.topbar .wrap{display:flex;align-items:center;gap:20px;height:58px}
+.brand{display:flex;align-items:center;gap:12px;cursor:pointer}
+.brand .logo{width:30px;height:30px;border-radius:8px;background:var(--brand);display:flex;align-items:center;justify-content:center;flex:none}
+.brand h1{font-size:17px;font-weight:700;letter-spacing:.02em}
+.brand .logo svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.crumb{font-size:13px;color:var(--ink2);margin-left:8px}
+.crumb .sep{margin:0 8px;color:var(--ink3)}
+.crumb .cur{color:var(--ink);font-weight:600}
+.nav{display:flex;gap:4px;background:#EEF2EC;border:1px solid var(--line);border-radius:9px;padding:3px;margin-left:8px}
+.nav a{font-size:13px;padding:5px 16px;border-radius:7px;color:var(--ink2);cursor:pointer;transition:all .15s}
+.nav a:hover{color:var(--ink)}
+.nav a.on{background:#fff;color:var(--brand);font-weight:600;box-shadow:0 1px 2px rgba(22,37,31,.10)}
+.topbar .meta{margin-left:auto;font-size:12px;color:var(--ink3);text-align:right;white-space:nowrap}
+.topbar .meta .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ok);margin-right:6px;vertical-align:1px}
+
+/* ===== 页面头 ===== */
+.pagehead{padding:26px 0 6px}
+.pagehead h2{font-size:24px;font-weight:900;letter-spacing:.01em;display:flex;align-items:baseline;gap:14px}
+.pagehead h2 .en{font-size:12px;color:var(--ink3);font-weight:500}
+.pagehead .sub{margin-top:6px;color:var(--ink2);font-size:13px;max-width:760px}
+.note{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font-size:12px;color:var(--ink3);background:#F0F4EF;border:1px solid var(--line);border-radius:6px;padding:4px 10px}
+.note svg{width:13px;height:13px;stroke:var(--ink3);flex:none}
+
+/* ===== 区块 ===== */
+.sec{margin-top:26px}
+.sec-h{display:flex;align-items:baseline;gap:10px;margin-bottom:12px}
+.sec-h h3{font-size:15px;font-weight:700}
+.sec-h .hint{font-size:12px;color:var(--ink3)}
+.sec-h .more{margin-left:auto;font-size:12px;color:var(--brand);font-weight:600;cursor:pointer}
+
+/* ===== 漏斗层级卡 ===== */
+.funnel{display:flex;align-items:stretch;gap:0}
+.fstage{flex:1 1 0;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 18px 16px;cursor:pointer;position:relative;transition:border-color .15s}
+.fstage:hover{border-color:var(--brand2)}
+.fstage .bar{position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:12px 0 0 12px}
+.fstage .top{display:flex;align-items:center;gap:8px}
+.fstage .top .nm{font-size:14px;font-weight:700}
+.fstage .top .tag{font-size:11px;color:var(--ink3);background:#F1F4F0;border-radius:4px;padding:1px 7px}
+.fstage .cnt{font-family:"Noto Serif SC",serif;font-size:42px;font-weight:900;line-height:1.1;margin-top:10px;font-variant-numeric:tabular-nums}
+.fstage .cnt small{font-size:14px;font-weight:600;color:var(--ink3);margin-left:6px}
+.fstage .add{display:flex;gap:14px;margin-top:10px;font-size:12px;color:var(--ink2)}
+.fstage .add b{font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.fstage .add .lbl{color:var(--ink3);margin-right:3px}
+.fstage .goal{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line)}
+.fstage .goal .gline{display:flex;justify-content:space-between;font-size:12px;color:var(--ink2);margin-bottom:6px}
+.fstage .goal .gline b{color:var(--ink);font-weight:700;font-variant-numeric:tabular-nums}
+.track{height:7px;background:#EDF1EB;border-radius:4px;overflow:hidden}
+.track i{display:block;height:100%;border-radius:4px;background:var(--brand2)}
+.fstage .go{padding-top:6px;font-size:12px;color:var(--ink3)}
+.fstage .go .lvl{font-weight:700;font-variant-numeric:tabular-nums}
+.arr{display:flex;align-items:center;justify-content:center;color:var(--ink3);flex:none;padding:0 8px}
+.arr svg{width:20px;height:20px;stroke:var(--ink3);stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+/* ===== 社康卡 ===== */
+.skgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(235px,1fr));gap:14px}
+.skcard{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;cursor:pointer;transition:border-color .15s}
+.skcard:hover{border-color:var(--brand2)}
+.skcard .nm{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
+.skcard .nm .dot{width:8px;height:8px;border-radius:50%;background:var(--brand2)}
+.skcard .vals{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px}
+.skcard .v{background:#F5F7F3;border-radius:8px;padding:8px 6px;text-align:center}
+.skcard .v .n{font-family:"Noto Serif SC",serif;font-size:19px;font-weight:800;font-variant-numeric:tabular-nums}
+.skcard .v .l{font-size:11px;color:var(--ink3);margin-top:2px}
+.skcard .goal{margin-top:12px;padding-top:10px;border-top:1px dashed var(--line);font-size:11px;color:var(--ink3)}
+.skcard .goal .t{margin-bottom:4px}
+.skcard .goal .lvl{float:right;font-weight:700;font-variant-numeric:tabular-nums}
+
+/* ===== 网格布局 ===== */
+.grid2{display:grid;grid-template-columns:1.5fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px}
+.filterbar .fb-sep{width:1px;height:20px;background:var(--line);margin:0 8px}
+.tbl .src{display:inline-block;margin-left:4px;font-size:10px;color:var(--ink3);border:1px solid var(--line);border-radius:4px;padding:0 4px;line-height:14px;vertical-align:1px;white-space:nowrap;cursor:help}
+.muted{color:var(--ink3)}
+.subcard.click{cursor:pointer;transition:transform .15s,border-color .15s}
+.subcard.click:hover{transform:translateY(-2px);border-color:var(--brand)}
+.subcard .p{font-size:11px;color:var(--brand);margin-top:6px;font-weight:600}
+.srcchip{display:inline-flex;align-items:center;gap:8px;margin:14px 0 0;padding:7px 12px;background:#E6F0EC;border:1px solid #C9DFD6;border-radius:20px;font-size:12px;color:var(--ink)}
+.srcchip a{color:var(--brand);cursor:pointer;font-weight:700}
+/* 漏斗分析区（左图右信息） */
+.funnel-wrap{display:grid;grid-template-columns:1.05fr 1fr;gap:18px;align-items:stretch}
+.finfo{display:flex;flex-direction:column;gap:12px}
+.finfo .frow{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:#fff;cursor:pointer;transition:border-color .15s}
+.finfo .frow:hover{border-color:var(--brand2)}
+.finfo .frow .h{display:flex;align-items:center;justify-content:space-between}
+.finfo .frow .h .nm{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px}
+.finfo .frow .h .nm i{width:9px;height:9px;border-radius:3px;display:inline-block;flex:none}
+.finfo .frow .h .cnt{font-family:"Noto Serif SC",serif;font-size:26px;font-weight:900;font-variant-numeric:tabular-nums}
+.finfo .frow .h .cnt small{font-size:12px;color:var(--ink3);font-weight:600;margin-left:4px}
+.finfo .frow .meta{display:flex;gap:18px;margin-top:8px;font-size:12px;color:var(--ink2);flex-wrap:wrap}
+.finfo .frow .meta b{color:var(--ink);font-variant-numeric:tabular-nums}
+.finfo .frow .meta .kw{color:var(--ink2)}
+.finfo .frow .meta .kw b{font-size:16px;font-weight:800;color:var(--brand);margin-left:2px}
+.finfo .frow .meta .dim{color:var(--ink3)}
+.finfo .frow .meta .dim b{color:var(--ink2);font-weight:600}
+.finfo .frow .goal{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);font-size:12px;color:var(--ink2);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.finfo .frow .goal .glab b{color:var(--ink);font-weight:700}
+.finfo .frow .goal .gact b{color:var(--ink);font-weight:700}
+.finfo .frow .goal .gsep{color:#C9CFC8}
+.finfo .frow .goal .glvl{white-space:nowrap;font-weight:700;font-variant-numeric:tabular-nums}
+.finfo .frow .goal .track{flex:1;height:6px}
+.finfo .frow .agemsg{margin-top:8px;font-size:11px;color:var(--warn)}
+/* 全局年龄筛选 */
+.filterbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:16px 0 0;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+.filterbar .fb-label{font-size:12px;color:var(--ink3);font-weight:600;margin-right:2px}
+.filterbar .fb-note{margin-left:auto;font-size:11px;color:var(--ink3)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px}
+.panel h4{font-size:14px;font-weight:700;margin-bottom:4px}
+.panel .phint{font-size:12px;color:var(--ink3);margin-bottom:12px}
+.chart{width:100%;min-height:300px}
+
+/* ===== KPI 组 ===== */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.kpi .l{font-size:12px;color:var(--ink3);display:flex;align-items:center;gap:6px}
+.kpi .l .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.kpi .n{font-family:"Noto Serif SC",serif;font-size:34px;font-weight:900;margin-top:6px;font-variant-numeric:tabular-nums;line-height:1.1}
+.kpi .n small{font-size:13px;color:var(--ink2);font-weight:600;margin-left:6px}
+
+/* ===== 目标对标 ===== */
+.goals{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.goalcard{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.goalcard .h{display:flex;justify-content:space-between;align-items:baseline}
+.goalcard .h .l{font-size:13px;font-weight:700}
+.goalcard .h .val{font-size:12px;color:var(--ink2);font-variant-numeric:tabular-nums}
+.goalcard .h .val b{color:var(--ink);font-size:15px;font-weight:800}
+.goalcard .track{margin-top:12px;height:8px}
+.goalcard .rate{display:flex;justify-content:space-between;margin-top:8px;font-size:12px;color:var(--ink2)}
+.goalcard .rate b{font-size:16px;font-variant-numeric:tabular-nums}
+.rate-ok{color:var(--ok)}.rate-warn{color:var(--warn)}.rate-bad{color:var(--bad)}
+
+/* ===== 表格 ===== */
+.tblwrap{overflow-x:auto}
+table.tbl{width:100%;border-collapse:collapse;font-size:13px}
+table.tbl th{text-align:left;font-weight:600;color:var(--ink2);padding:11px 14px;border-bottom:1px solid var(--line);white-space:nowrap;background:#FAFBF8}
+table.tbl td{padding:11px 14px;border-bottom:1px solid var(--line2);white-space:nowrap}
+table.tbl tbody tr:hover{background:#F7F9F5}
+table.tbl td.numc,table.tbl th.numc{text-align:right;font-variant-numeric:tabular-nums}
+.chip{display:inline-block;font-size:11px;padding:1px 8px;border-radius:20px;background:#F0F4EF;color:var(--ink2)}
+.chip.b{background:#E7F1EC;color:var(--brand)}
+.chip.o{background:#F6EFE2;color:#9A6B17}
+.chip.bad{background:#F5E8E4;color:#A44A38}
+.chip.done{background:#E7F1EC;color:var(--ok)}
+.chip.run{background:#EAF1F7;color:#2E6D9E}
+.chip.plan{background:#F0F2EF;color:var(--ink3)}
+
+/* ===== 筛选 ===== */
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.fbtn{font-size:13px;padding:6px 14px;border-radius:20px;border:1px solid var(--line);background:var(--panel);color:var(--ink2);cursor:pointer;transition:all .15s}
+.fbtn.on{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:600}
+.fbtn:hover{border-color:var(--brand2)}
+
+/* ===== 心跳线 ===== */
+.hrt{margin:14px 0 4px;border-bottom:1px solid var(--line)}
+
+/* ===== 空态 ===== */
+.empty{border:1px dashed var(--line);border-radius:12px;padding:36px 20px;text-align:center;color:var(--ink3);background:#FAFBF8}
+.empty .t{font-size:14px;font-weight:600;color:var(--ink2);margin-bottom:4px}
+
+/* ===== 子渠道 ===== */
+.subgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.subcard{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:#fff}
+.subcard .nm{font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px}
+.subcard .nm i{width:9px;height:9px;border-radius:3px;display:inline-block;flex:none}
+.subcard .n{font-family:"Noto Serif SC",serif;font-size:26px;font-weight:900;margin-top:6px;font-variant-numeric:tabular-nums}
+.subcard .p{font-size:12px;color:var(--ink3);margin-top:2px}
+
+/* ===== 洞察 ===== */
+.insight{background:#F0F6F3;border:1px solid #D5E7DE;border-left:3px solid var(--brand);border-radius:10px;padding:14px 16px;font-size:13px;color:var(--ink)}
+.insight b{color:var(--brand)}
+.insight .lbl{font-size:11px;color:var(--brand);font-weight:700;letter-spacing:.08em;margin-bottom:4px}
+
+/* ===== 返回 ===== */
+.back{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--ink2);cursor:pointer;margin-bottom:4px}
+.back svg{width:15px;height:15px;stroke:var(--ink2)}
+.back:hover{color:var(--brand)}
+
+.astats .ash h4{font-size:13px;margin:0 0 6px}
+.astats .arow{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px dashed var(--line);font-size:12px}
+.astats .arow span{color:var(--ink2)}
+.astats .arow b{font-size:14px;color:var(--ink);font-variant-numeric:tabular-nums}
+.ash{font-size:12px;font-weight:700;color:var(--ink)}
+/* ===== 年龄分布 ===== */
+.adist{margin-top:10px;padding:12px 14px;background:var(--bg);border-radius:8px}
+.adhead{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:4px}
+.adrow{display:flex;align-items:center;gap:10px;padding:5px 0;font-size:12px}
+.al{width:56px;color:var(--ink2);flex:none}
+.atrack{flex:1;height:8px;background:#E5EBE6;border-radius:4px;overflow:hidden}
+.atrack i{display:block;height:100%;background:var(--brand2);border-radius:4px}
+.an{width:104px;text-align:right;color:var(--ink2);font-variant-numeric:tabular-nums;flex:none}
+.ameta{margin-top:8px;font-size:11px;color:var(--ink3)}
+/* ===== 设置页 ===== */
+.srow{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px dashed var(--line);flex-wrap:wrap}
+.srow:last-child{border-bottom:none}
+.sl{width:150px;font-size:12px;color:var(--ink2);font-weight:600;flex:none}
+.inp{flex:1;min-width:200px;max-width:440px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:#FBFCFA;color:var(--ink);outline:none}
+.inp:focus{border-color:var(--brand2)}
+.btn{padding:9px 16px;border:1px solid var(--line);border-radius:8px;background:#fff;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer}
+.btn:hover{border-color:var(--brand2);color:var(--brand)}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.primary:hover{background:var(--brand2)}
+.btn.danger{color:#C0392B;border-color:#E8C9C4}
+.btn.danger:hover{background:#FBEFED}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.sinfo{flex:1;font-size:13px;color:var(--ink2);min-width:200px}
+.sinfo b{color:var(--ink)}
+.smsg{margin-top:10px;font-size:12px;color:var(--brand)}
+.smsg.warn{color:#B9770E}
+.smsg.note2{color:var(--ink3)}
+.sstat{margin-top:10px;padding:10px 12px;background:var(--bg);border-radius:8px;font-size:12px;color:var(--ink2)}
+.stab{width:100%;border-collapse:collapse;font-size:13px}
+.stab th,.stab td{padding:10px 12px;border-bottom:1px solid var(--line2);text-align:left}
+.stab th{color:var(--ink3);font-weight:600;font-size:12px}
+.stab td b{color:var(--ink)}
+@media (max-width:900px){
+  .funnel{flex-direction:column}
+  .arr{padding:2px 0}
+  .arr svg{transform:rotate(90deg)}
+  .grid2,.grid3{grid-template-columns:1fr}
+  .funnel-wrap{grid-template-columns:1fr}
+  .filterbar .fb-note{display:none}
+  .kpis{grid-template-columns:1fr 1fr}
+  .goals{grid-template-columns:1fr}
+  .subgrid{grid-template-columns:1fr 1fr}
+  .nav{display:none}
+  .topbar .crumb{display:none}
+  .topbar .meta{display:none}
+  .pagehead h2{font-size:20px}
+}
+@media (max-width:560px){
+  .kpis{grid-template-columns:1fr}
+  .wrap{padding:0 14px}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="wrap">
+    <div class="brand" onclick="go('#/overview')">
+      <div class="logo">
+        <svg viewBox="0 0 24 24"><path d="M3 12h4l2-5 3 10 2-6 1 1h6"/></svg>
+      </div>
+      <h1 class="serif">社康健康经营看板</h1>
+    </div>
+    <nav class="nav" id="nav">
+      <a href="#/overview" data-h="overview">总览</a>
+      <a href="#/layer/%E8%A7%A6%E8%BE%BE" data-h="触达">触达</a>
+      <a href="#/layer/%E4%BD%93%E9%AA%8C" data-h="体验">体验</a>
+      <a href="#/layer/%E8%AE%A2%E9%98%85" data-h="订阅">订阅</a>
+      <a href="#/settings" data-h="settings">设置</a>
+    </nav>
+    <div class="crumb" id="crumb"></div>
+    <div class="meta"><span class="dot"></span>数据截止 <b id="metaDate"></b> · 汇总同步至 08-27</div>
+  </div>
+</div>
+<div class="wrap">
+  <div id="app"></div>
+</div>
+
+<script>
+/* ============ 数据 ============ */
+const DATA = {"meta": {"refDate": "2026-08-28", "refDateCN": "2026年8月28日 周五", "month": "8月", "monthCN": "2026年8月", "week": "8月W5", "weekStart": "2026-08-24", "weekEnd": "2026-08-30", "monthStart": "2026-08-01", "monthEnd": "2026-08-31", "noteTarget": "目标与实际按《目标完成汇总表》口径（同步至 2026-08-27）；本日/本周/本月新增按明细表实时统计。", "src": "飞书多维表", "srcAt": "2026-08-29 09:10"}, "sk": ["和联社康", "吉祥里社康", "民治社康", "鹭湖社康", "紫薇社康"], "reg": [["和联社康", "2026-08-24", "医生介绍", "男", "50以下"], ["和联社康", "2026-08-26", "医生介绍", "女", "50以下"], ["和联社康", "2026-08-26", "医生介绍", "男", "50以下"], ["和联社康", "2026-08-27", "医生介绍", "女", "50以下"], ["和联社康", "2026-08-27", "医生介绍", "女", "50以下"], ["和联社康", "2026-08-27", "医生介绍", "男", "50以下"], ["和联社康", "2026-08-28", "医生介绍", "男", "50以下"], ["吉祥里社康", "2026-08-24", "医生介绍", "男", "61-70"], ["吉祥里社康", "2026-08-24", "医生介绍", "女", "61-70"], ["吉祥里社康", "2026-08-25", "医生介绍", "女", "51-60"], ["吉祥里社康", "2026-08-24", "医生介绍", "男", "51-60"], ["吉祥里社康", "2026-08-24", "医生介绍", "男", "50以下"], ["吉祥里社康", "2026-08-24", "医生介绍", "男", "51-60"], ["吉祥里社康", "2026-08-24", "医生介绍", "男", "51-60"], ["吉祥里社康", "2026-08-24", "自行拓展", "女", "51-60"], ["吉祥里社康", "2026-08-24", "自行拓展", "女", "51-60"], ["吉祥里社康", "2026-08-24", "自行拓展", "女", "51-60"], ["吉祥里社康", "2026-08-25", "自行拓展", "男", "50以下"], ["吉祥里社康", "2026-08-25", "自行拓展", "男", "61-70"], ["吉祥里社康", "2026-08-25", "医生介绍", "女", "50以下"], ["吉祥里社康", "2026-08-25", "自行拓展", "女", "51-60"], ["吉祥里社康", "2026-08-25", "医生介绍", "男", "51-60"], ["吉祥里社康", "2026-08-25", "自行拓展", "男", "51-60"], ["吉祥里社康", "2026-08-25", "医生介绍", "男", "51-60"], ["吉祥里社康", "2026-08-26", "医生介绍", "男", "51-60"], ["吉祥里社康", "2026-08-26", "自行拓展", "女", "51-60"], ["吉祥里社康", "2026-08-26", "医生介绍", "男", "61-70"], ["吉祥里社康", "2026-08-26", "医生介绍", "女", "51-60"], ["吉祥里社康", "2026-08-26", "自行拓展", "女", "61-70"], ["吉祥里社康", "2026-08-26", "医生介绍", "女", "51-60"], ["吉祥里社康", "2026-08-26", "医生介绍", "男", "61-70"], ["吉祥里社康", "2026-08-26", "医生介绍", "男", "61-70"], ["吉祥里社康", "2026-08-27", "自行拓展", "男", "51-60"], ["吉祥里社康", "2026-08-27", "医生介绍", "女", "51-60"], ["吉祥里社康", "2026-08-27", "医生介绍", "男", "61-70"], ["吉祥里社康", "2026-08-27", "自行拓展", "男", "50以下"], ["吉祥里社康", "2026-08-28", "医生介绍", "男", "61-70"], ["吉祥里社康", "2026-08-28", "医生介绍", "男", "61-70"], ["吉祥里社康", "2026-08-28", "自行拓展", "女", "61-70"], ["吉祥里社康", "2026-08-28", "自行拓展", "女", "61-70"], ["吉祥里社康", "2026-08-28", "医生介绍", "女", "61-70"], ["吉祥里社康", "2026-08-28", "医生介绍", "女", "61-70"], ["吉祥里社康", "2026-08-28", "医生介绍", "男", "51-60"], ["吉祥里社康", "2026-08-28", "医生介绍", "男", "51-60"], ["吉祥里社康", "2026-08-28", "医生介绍", "女", "51-60"], ["吉祥里社康", "2026-08-28", "医生介绍", "女", "50以下"], ["民治社康", "2026-08-25", "医生介绍", "女", "51-60"], ["民治社康", "2026-08-27", "医生介绍", "女", "50以下"], ["民治社康", "2026-08-28", "医生介绍", "女", "50以下"], ["民治社康", "2026-08-28", "医生介绍", "女", "50以下"], ["民治社康", "2026-08-28", "医生介绍", "女", "51-60"], ["鹭湖社康", "2026-08-21", "医生介绍", "女", "50以下"], ["鹭湖社康", "2026-08-27", "自行拓展", "女", "50以下"], ["鹭湖社康", "2026-08-27", "自行拓展", "女", "50以下"], ["鹭湖社康", "2026-08-28", "医生介绍", "男", "51-60"], ["鹭湖社康", "2026-08-28", "自行拓展", "女", "51-60"], ["鹭湖社康", "2026-08-29", "医生介绍", "男", "50以下"]], "exp": [["和联社康", "黄婷", "个人用户", "", "押金", "2026-08-06", "2026-08-25", "", ""], ["和联社康", "叶峰", "个人用户", "", "自备", "2026-07-31", "", "", ""], ["和联社康", "王桂芳", "个人用户", "", "购买", "2026-08-17", "", "", ""], ["和联社康", "邹运明", "个人用户", "", "押金", "2026-08-17", "", "", ""], ["和联社康", "周年兴", "个人用户", "", "押金", "2026-08-18", "", "", ""], ["和联社康", "张丽", "个人用户", "", "押金", "2026-08-18", "", "", ""], ["和联社康", "曾祥发", "个人用户", "", "押金", "2026-08-18", "", "", ""], ["和联社康", "朱国集", "个人用户", "", "押金", "2026-08-22", "", "", ""], ["和联社康", "田稻香", "个人用户", "", "押金", "2026-08-22", "", "", ""], ["和联社康", "黎鹏飞", "个人用户", "", "押金", "2026-08-24", "", "", ""], ["和联社康", "李鹏飞", "医护人员", "", "押金", "2026-07-27", "", "", ""], ["和联社康", "伍淑华", "医护人员", "", "押金", "2026-07-23", "", "", ""], ["和联社康", "龙顺姬", "医护人员", "", "押金", "2026-07-21", "2026-08-26", "", ""], ["和联社康", "陈长珍", "医护人员", "", "押金", "2026-07-18", "", "", ""], ["和联社康", "陈果果", "医护人员", "", "押金", "2026-07-17", "", "", ""], ["和联社康", "方波", "医护人员", "", "押金", "2026-07-16", "", "", ""], ["和联社康", "龚莉", "医护人员", "", "押金", "2026-07-16", "", "", ""], ["和联社康", "文春颖", "医护人员", "", "押金", "2026-07-16", "", "", ""], ["和联社康", "宁建琳", "医护人员", "", "押金", "2026-07-16", "", "", ""], ["和联社康", "甘会颖", "医护人员", "", "押金", "2026-07-16", "", "", ""], ["和联社康", "用户651649", "医护人员", "", "押金", "2026-07-16", "", "", ""], ["和联社康", "隋凤轩", "医护人员", "", "押金", "2026-07-16", "", "", ""], ["和联社康", "丽妹", "医护人员", "", "押金", "2026-07-16", "", "", ""], ["和联社康", "张聪", "医护人员", "", "押金", "2026-07-15", "", "", ""], ["和联社康", "用户871994", "医护人员", "", "押金", "2026-07-15", "", "", ""], ["和联社康", "王雪", "医护人员", "", "押金", "2026-07-15", "", "", ""], ["和联社康", "用户261967", "医护人员", "", "押金", "2026-07-15", "", "", ""], ["和联社康", "用户045505", "医护人员", "", "押金", "2026-07-15", "", "", ""], ["和联社康", "用户583633", "医护人员", "", "押金", "2026-07-15", "", "", ""], ["和联社康", "黄雪霞", "个人用户", "", "押金", "2026-08-26", "", "", ""], ["和联社康", "陈美铁", "个人用户", "", "自备", "2026-08-26", "", "", ""], ["和联社康", "用户249939", "医护人员", "", "押金", "2026-07-23", "", "", ""], ["和联社康", "朱玲丽", "个人用户", "", "押金", "2026-07-31", "", "", ""], ["和联社康", "彭清连", "个人用户", "", "押金", "2026-08-27", "", "", ""], ["和联社康", "李爱平", "医护人员", "", "押金", "2026-08-27", "", "", ""], ["和联社康", "谭祁武", "个人用户", "", "押金", "2026-08-28", "", "", ""], ["吉祥里社康", "关柏春", "个人用户", "", "自备", "2026-08-24", "", "", ""], ["吉祥里社康", "简秒娟", "个人用户", "", "自备", "2026-08-24", "", "", ""], ["吉祥里社康", "李秀金", "个人用户", "", "押金", "2026-08-24", "", "", ""], ["吉祥里社康", "张凤喜", "个人用户", "", "押金", "2026-08-24", "", "", ""], ["吉祥里社康", "魏祝浓", "个人用户", "", "押金", "2026-08-24", "", "", ""], ["吉祥里社康", "李美英", "医护人员", "", "自备", "2026-08-24", "", "", ""], ["吉祥里社康", "张居雄", "个人用户", "", "押金", "2026-08-25", "", "", ""], ["吉祥里社康", "李云高", "个人用户", "", "押金", "2026-08-25", "", "", ""], ["吉祥里社康", "李俊", "个人用户", "", "自备", "2026-08-02", "", "", ""], ["吉祥里社康", "用户065358", "个人用户", "", "押金", "2026-08-12", "", "", ""], ["吉祥里社康", "用户189578", "个人用户", "", "押金", "2026-07-11", "", "", ""], ["吉祥里社康", "用户728656", "个人用户", "", "押金", "2026-07-08", "", "", ""], ["吉祥里社康", "用户045211", "个人用户", "", "押金", "2026-07-08", "", "", ""], ["吉祥里社康", "用户366117", "个人用户", "", "押金", "2026-07-08", "", "", ""], ["吉祥里社康", "用户440478", "个人用户", "", "押金", "2026-07-08", "", "", ""], ["吉祥里社康", "用户520988", "个人用户", "", "押金", "2026-07-08", "", "", ""], ["吉祥里社康", "用户418179", "个人用户", "", "押金", "2026-07-08", "", "", ""], ["吉祥里社康", "用户943153", "个人用户", "", "押金", "2026-07-06", "", "", ""], ["吉祥里社康", "用户642705", "个人用户", "", "押金", "2026-07-06", "", "", ""], ["吉祥里社康", "用户438806", "个人用户", "", "押金", "2026-07-06", "", "", ""], ["吉祥里社康", "用户394067", "个人用户", "", "押金", "2026-07-03", "", "", ""], ["吉祥里社康", "陈良辉", "个人用户", "", "押金", "2026-08-25", "", "", ""], ["吉祥里社康", "黄振光", "个人用户", "", "押金", "2026-08-26", "", "", ""], ["吉祥里社康", "", "", "", "", "", "", "", ""], ["吉祥里社康", "梁章荣", "个人用户", "", "押金", "2026-08-26", "", "", ""], ["吉祥里社康", "罗桃秀", "个人用户", "", "押金", "", "", "", ""], ["吉祥里社康", "张思", "个人用户", "", "押金", "2026-08-27", "", "", ""], ["吉祥里社康", "陈自立", "个人用户", "", "自备", "2026-08-27", "", "", ""], ["吉祥里社康", "罗玉兰", "个人用户", "", "押金", "2026-08-28", "", "", ""], ["吉祥里社康", "陈岭珍", "个人用户", "", "押金", "2026-08-28", "", "", ""], ["吉祥里社康", "计金玉", "个人用户", "", "押金", "2026-08-28", "", "", ""], ["吉祥里社康", "罗桃秀", "", "", "", "", "", "", ""], ["吉祥里社康", "张莉", "", "", "", "", "", "", ""], ["吉祥里社康", "李琼珍", "个人用户", "", "押金", "2026-08-28", "", "", ""], ["民治社康", "马云", "医护人员", "", "押金", "2026-08-24", "", "", ""], ["民治社康", "范宝芳", "个人用户", "", "押金", "2026-08-22", "", "", ""], ["民治社康", "刘兴华", "医护人员", "", "押金", "2026-08-21", "", "", ""], ["民治社康", "杨聂霞", "医护人员", "", "押金", "2026-08-21", "", "", ""], ["民治社康", "何丽婵", "医护人员", "", "押金", "2026-08-21", "", "", ""], ["民治社康", "蓝标明", "医护人员", "", "押金", "2026-08-20", "", "", ""], ["民治社康", "陈若谷", "医护人员", "", "押金", "2026-08-14", "", "", ""], ["民治社康", "靖", "医护人员", "", "押金", "2026-08-14", "", "", ""], ["民治社康", "易聪莎", "医护人员", "", "押金", "2026-08-14", "", "", ""], ["民治社康", "梁伟君", "医护人员", "", "押金", "2026-08-14", "", "", ""], ["民治社康", "雷娅丽", "医护人员", "", "押金", "2026-08-14", "", "", ""], ["民治社康", "李涵", "医护人员", "", "押金", "2026-08-14", "", "", ""], ["民治社康", "张苗", "医护人员", "", "押金", "2026-08-14", "", "", ""], ["民治社康", "夏会敏", "医护人员", "", "押金", "2026-08-14", "", "", ""], ["民治社康", "土岂水函", "医护人员", "", "押金", "2026-08-14", "", "", ""], ["民治社康", "张四阳", "个人用户", "", "押金", "2026-08-12", "", "", ""], ["民治社康", "张月阳", "医护人员", "", "押金", "2026-08-05", "", "", ""], ["民治社康", "周水红", "医护人员", "", "押金", "2026-08-05", "", "", ""], ["民治社康", "翟翟", "医护人员", "", "押金", "2026-08-05", "", "", ""], ["民治社康", "周水红", "医护人员", "", "押金", "2026-08-05", "", "", ""], ["民治社康", "张文芝", "医护人员", "", "押金", "2026-08-05", "", "", ""], ["民治社康", "何小珊", "医护人员", "", "押金", "2026-08-05", "", "", ""], ["民治社康", "陈红", "医护人员", "", "押金", "2026-08-05", "", "", ""], ["民治社康", "用户478764", "医护人员", "", "押金", "2026-08-01", "", "", ""], ["民治社康", "陈凯", "个人用户", "", "押金", "2026-07-15", "", "", ""], ["民治社康", "余丽璇", "", "", "", "2026-08-25", "", "", ""], ["鹭湖社康", "用户033204", "个人用户", "", "押金", "2026-08-21", "", "", ""], ["鹭湖社康", "刘爱敏", "个人用户", "", "押金", "2026-08-19", "", "", ""], ["鹭湖社康", "赵阳", "个人用户", "", "押金", "2026-08-19", "", "", ""], ["鹭湖社康", "朱一青", "个人用户", "", "押金", "2026-08-18", "", "", ""], ["鹭湖社康", "刘明英", "个人用户", "", "押金", "2026-08-14", "", "", ""], ["鹭湖社康", "陈继华", "个人用户", "", "押金", "2026-08-14", "", "", ""], ["鹭湖社康", "林辉跃", "个人用户", "", "押金", "2026-08-12", "", "", ""], ["鹭湖社康", "冯书记", "个人用户", "", "押金", "2026-08-12", "", "", ""], ["鹭湖社康", "王静", "医护人员", "", "押金", "2026-08-12", "", "", ""], ["鹭湖社康", "黄利兰", "医护人员", "", "押金", "2026-08-12", "", "", ""], ["鹭湖社康", "李小剑", "个人用户", "", "押金", "2026-08-09", "", "", ""], ["鹭湖社康", "李红敏", "个人用户", "", "押金", "2026-08-09", "", "", ""], ["鹭湖社康", "邓小兰", "个人用户", "", "押金", "2026-08-05", "", "", ""], ["鹭湖社康", "欧阳丽蓬", "个人用户", "", "押金", "2026-08-05", "", "", ""], ["鹭湖社康", "王艳莉", "个人用户", "", "押金", "2026-08-03", "", "", ""], ["鹭湖社康", "陈丽红", "个人用户", "", "押金", "2026-07-29", "", "", ""], ["鹭湖社康", "社康董", "个人用户", "", "押金", "2026-08-29", "", "", ""], ["鹭湖社康", "用户889537", "个人用户", "", "押金", "2026-08-29", "", "", ""], ["鹭湖社康", "曹雪梅", "个人用户", "", "押金", "2026-08-28", "", "", ""], ["鹭湖社康", "胡婷", "个人用户", "", "押金", "2026-08-28", "", "", ""], ["鹭湖社康", "吴明媚", "个人用户", "", "押金", "2026-07-28", "", "", ""], ["鹭湖社康", "黄珊珊", "个人用户", "", "押金", "2026-07-28", "", "", ""], ["鹭湖社康", "用户613878", "个人用户", "", "押金", "2026-07-28", "", "", ""], ["鹭湖社康", "梁艳", "个人用户", "", "押金", "2026-07-27", "", "", ""], ["鹭湖社康", "刘韵", "个人用户", "", "押金", "2026-07-27", "", "", ""], ["鹭湖社康", "徐蕾", "个人用户", "", "押金", "2026-07-27", "", "", ""], ["鹭湖社康", "常荷英", "个人用户", "", "押金", "2026-07-27", "", "", ""], ["鹭湖社康", "常韵晗", "个人用户", "健康陪伴", "押金", "2026-08-27", "", "", ""], ["鹭湖社康", "梁灼生", "个人用户", "睡眠改善", "押金", "2026-08-27", "", "", ""], ["紫薇社康", "用户781101", "个人用户", "", "押金", "2026-08-18", "", "", ""], ["紫薇社康", "谢文辉", "个人用户", "", "押金", "2026-08-10", "", "", ""], ["紫薇社康", "陆亚军", "个人用户", "", "押金", "2026-08-09", "", "", ""], ["紫薇社康", "陈细裕", "个人用户", "", "自备", "2026-08-04", "", "", ""], ["紫薇社康", "郑玉林", "个人用户", "", "押金", "2026-07-28", "", "", ""], ["紫薇社康", "陈映英", "个人用户", "", "押金", "2026-07-27", "", "", ""], ["紫薇社康", "曾理格", "个人用户", "", "押金", "2026-07-27", "", "", ""], ["紫薇社康", "黄梦婷", "医护人员", "", "押金", "2026-07-23", "", "", ""], ["紫薇社康", "蔡億婷", "医护人员", "", "押金", "2026-07-23", "", "", ""], ["紫薇社康", "陈", "个人用户", "", "押金", "2026-07-23", "", "", ""], ["紫薇社康", "欧晓童", "个人用户", "", "押金", "2026-07-23", "", "", ""], ["紫薇社康", "李海清", "医护人员", "", "押金", "2026-07-23", "", "", ""], ["紫薇社康", "吴红英", "个人用户", "", "押金", "2026-07-22", "", "", ""], ["紫薇社康", "宾湘赣", "医护人员", "", "押金", "2026-07-22", "", "", ""], ["紫薇社康", "李俊贤", "个人用户", "", "押金", "2026-07-22", "", "", ""], ["紫薇社康", "邱映明", "医护人员", "", "押金", "2026-07-21", "", "", ""], ["紫薇社康", "邓演霞", "医护人员", "", "押金", "2026-07-21", "", "", ""], ["紫薇社康", "用户129154", "个人用户", "", "押金", "2026-07-21", "", "", ""], ["紫薇社康", "用户101111", "个人用户", "", "押金", "2026-07-20", "", "", ""], ["紫薇社康", "欧鑫燕", "医护人员", "", "押金", "2026-07-20", "", "", ""], ["紫薇社康", "吴苑怡", "医护人员", "", "押金", "2026-07-20", "", "", ""], ["紫薇社康", "邓冬苗", "医护人员", "", "押金", "2026-07-20", "", "", ""]], "act": [["和联社康", "和联社区义诊", "义诊", "已完成", "2026-08-15", 90, 82, 2500, "和联社区广场"], ["和联社康", "和联家医联动回访", "家医联动", "进行中", "2026-08-25", 40, 0, 600, "和联社康中心"], ["和联社康", "和联企业健康讲座", "企业活动", "计划中", "2026-09-18", 55, 0, 900, "和联园区"], ["紫薇社康", "紫薇糖尿病家医联动随访", "家医联动", "已完成", "2026-08-10", 50, 48, 1200, "紫薇社康中心"], ["紫薇社康", "紫薇社区义诊", "义诊", "进行中", "2026-08-22", 70, 0, 1800, "紫薇社区广场"], ["紫薇社康", "紫薇企业健康筛查", "企业活动", "计划中", "2026-08-28", 60, 0, 2200, "紫薇园区"]], "sub": [], "weekly": [["总体", "8月W4", "触达", 0, 1], ["总体", "8月W5", "触达", 400, 52], ["总体", "9月W1", "触达", 1257, 0], ["总体", "9月W2", "触达", 1657, 0], ["总体", "9月W3", "触达", 2057, 0], ["总体", "9月W4", "触达", 2457, 0], ["总体", "9月W5", "触达", 2857, 0], ["总体", "10月W1", "触达", 2857, 0], ["总体", "10月W2", "触达", 4000, 0], ["总体", "10月W3", "触达", 5500, 0], ["总体", "10月W4", "触达", 6800, 0], ["总体", "10月W5", "触达", 7900, 0], ["总体", "11月W1", "触达", 9100, 0], ["总体", "11月W2", "触达", 11000, 0], ["总体", "11月W3", "触达", 12000, 0], ["总体", "11月W4", "触达", 13000, 0], ["总体", "11月W5", "触达", 15000, 0], ["总体", "8月W4", "体验", 0, 17], ["总体", "8月W5", "体验", 80, 31], ["总体", "9月W1", "体验", 200, 0], ["总体", "9月W2", "体验", 400, 0], ["总体", "9月W3", "体验", 600, 0], ["总体", "9月W4", "体验", 800, 0], ["总体", "9月W5", "体验", 1000, 0], ["总体", "10月W1", "体验", 1000, 0], ["总体", "10月W2", "体验", 1400, 0], ["总体", "10月W3", "体验", 1800, 0], ["总体", "10月W4", "体验", 2300, 0], ["总体", "10月W5", "体验", 2700, 0], ["总体", "11月W1", "体验", 3160, 0], ["总体", "11月W2", "体验", 3620, 0], ["总体", "11月W3", "体验", 4080, 0], ["总体", "11月W4", "体验", 4540, 0], ["总体", "11月W5", "体验", 5000, 0], ["总体", "8月W4", "订阅", 0, 0], ["总体", "8月W5", "订阅", 0, 0], ["总体", "9月W1", "订阅", 20, 0], ["总体", "9月W2", "订阅", 40, 0], ["总体", "9月W3", "订阅", 60, 0], ["总体", "9月W4", "订阅", 80, 0], ["总体", "9月W5", "订阅", 100, 0], ["总体", "10月W1", "订阅", 100, 0], ["总体", "10月W2", "订阅", 240, 0], ["总体", "10月W3", "订阅", 280, 0], ["总体", "10月W4", "订阅", 320, 0], ["总体", "10月W5", "订阅", 340, 0], ["总体", "11月W1", "订阅", 380, 0], ["总体", "11月W2", "订阅", 420, 0], ["总体", "11月W3", "订阅", 460, 0], ["总体", "11月W4", "订阅", 500, 0], ["总体", "11月W5", "订阅", 550, 0], ["鹭湖社康", "8月W4", "触达", 0, 1], ["鹭湖社康", "8月W5", "触达", 100, 4], ["鹭湖社康", "9月W1", "触达", 330, 0], ["鹭湖社康", "9月W2", "触达", 415, 0], ["鹭湖社康", "9月W3", "触达", 515, 0], ["鹭湖社康", "9月W4", "触达", 615, 0], ["鹭湖社康", "9月W5", "触达", 715, 0], ["鹭湖社康", "10月W1", "触达", 715, 0], ["鹭湖社康", "10月W2", "触达", 1000, 0], ["鹭湖社康", "10月W3", "触达", 1375, 0], ["鹭湖社康", "10月W4", "触达", 1700, 0], ["鹭湖社康", "10月W5", "触达", 1975, 0], ["鹭湖社康", "11月W1", "触达", 2275, 0], ["鹭湖社康", "11月W2", "触达", 2750, 0], ["鹭湖社康", "11月W3", "触达", 3000, 0], ["鹭湖社康", "11月W4", "触达", 3250, 0], ["鹭湖社康", "11月W5", "触达", 3750, 0], ["鹭湖社康", "8月W4", "体验", 0, 4], ["鹭湖社康", "8月W5", "体验", 20, 6], ["鹭湖社康", "9月W1", "体验", 50, 0], ["鹭湖社康", "9月W2", "体验", 100, 0], ["鹭湖社康", "9月W3", "体验", 150, 0], ["鹭湖社康", "9月W4", "体验", 200, 0], ["鹭湖社康", "9月W5", "体验", 250, 0], ["鹭湖社康", "10月W1", "体验", 250, 0], ["鹭湖社康", "10月W2", "体验", 350, 0], ["鹭湖社康", "10月W3", "体验", 450, 0], ["鹭湖社康", "10月W4", "体验", 575, 0], ["鹭湖社康", "10月W5", "体验", 675, 0], ["鹭湖社康", "11月W1", "体验", 790, 0], ["鹭湖社康", "11月W2", "体验", 905, 0], ["鹭湖社康", "11月W3", "体验", 1020, 0], ["鹭湖社康", "11月W4", "体验", 1135, 0], ["鹭湖社康", "11月W5", "体验", 1250, 0], ["鹭湖社康", "8月W4", "订阅", 0, 0], ["鹭湖社康", "8月W5", "订阅", 0, 0], ["鹭湖社康", "9月W1", "订阅", 5, 0], ["鹭湖社康", "9月W2", "订阅", 10, 0], ["鹭湖社康", "9月W3", "订阅", 15, 0], ["鹭湖社康", "9月W4", "订阅", 20, 0], ["鹭湖社康", "9月W5", "订阅", 25, 0], ["鹭湖社康", "10月W1", "订阅", 25, 0], ["鹭湖社康", "10月W2", "订阅", 60, 0], ["鹭湖社康", "10月W3", "订阅", 70, 0], ["鹭湖社康", "10月W4", "订阅", 80, 0], ["鹭湖社康", "10月W5", "订阅", 85, 0], ["鹭湖社康", "11月W1", "订阅", 95, 0], ["鹭湖社康", "11月W2", "订阅", 105, 0], ["鹭湖社康", "11月W3", "订阅", 115, 0], ["鹭湖社康", "11月W4", "订阅", 125, 0], ["鹭湖社康", "11月W5", "订阅", 138, 0], ["紫薇社康", "8月W4", "触达", 0, 0], ["紫薇社康", "8月W5", "触达", 100, 0], ["紫薇社康", "9月W1", "触达", 330, 0], ["紫薇社康", "9月W2", "触达", 415, 0], ["紫薇社康", "9月W3", "触达", 515, 0], ["紫薇社康", "9月W4", "触达", 615, 0], ["紫薇社康", "9月W5", "触达", 715, 0], ["紫薇社康", "10月W1", "触达", 715, 0], ["紫薇社康", "10月W2", "触达", 1000, 0], ["紫薇社康", "10月W3", "触达", 1375, 0], ["紫薇社康", "10月W4", "触达", 1700, 0], ["紫薇社康", "10月W5", "触达", 1975, 0], ["紫薇社康", "11月W1", "触达", 2275, 0], ["紫薇社康", "11月W2", "触达", 2750, 0], ["紫薇社康", "11月W3", "触达", 3000, 0], ["紫薇社康", "11月W4", "触达", 3250, 0], ["紫薇社康", "11月W5", "触达", 3750, 0], ["紫薇社康", "8月W4", "体验", 0, 1], ["紫薇社康", "8月W5", "体验", 20, 0], ["紫薇社康", "9月W1", "体验", 50, 0], ["紫薇社康", "9月W2", "体验", 100, 0], ["紫薇社康", "9月W3", "体验", 150, 0], ["紫薇社康", "9月W4", "体验", 200, 0], ["紫薇社康", "9月W5", "体验", 250, 0], ["紫薇社康", "10月W1", "体验", 250, 0], ["紫薇社康", "10月W2", "体验", 350, 0], ["紫薇社康", "10月W3", "体验", 450, 0], ["紫薇社康", "10月W4", "体验", 575, 0], ["紫薇社康", "10月W5", "体验", 675, 0], ["紫薇社康", "11月W1", "体验", 790, 0], ["紫薇社康", "11月W2", "体验", 905, 0], ["紫薇社康", "11月W3", "体验", 1020, 0], ["紫薇社康", "11月W4", "体验", 1135, 0], ["紫薇社康", "11月W5", "体验", 1250, 0], ["紫薇社康", "8月W4", "订阅", 0, 0], ["紫薇社康", "8月W5", "订阅", 0, 0], ["紫薇社康", "9月W1", "订阅", 5, 0], ["紫薇社康", "9月W2", "订阅", 10, 0], ["紫薇社康", "9月W3", "订阅", 15, 0], ["紫薇社康", "9月W4", "订阅", 20, 0], ["紫薇社康", "9月W5", "订阅", 25, 0], ["紫薇社康", "10月W1", "订阅", 25, 0], ["紫薇社康", "10月W2", "订阅", 60, 0], ["紫薇社康", "10月W3", "订阅", 70, 0], ["紫薇社康", "10月W4", "订阅", 80, 0], ["紫薇社康", "10月W5", "订阅", 85, 0], ["紫薇社康", "11月W1", "订阅", 95, 0], ["紫薇社康", "11月W2", "订阅", 105, 0], ["紫薇社康", "11月W3", "订阅", 115, 0], ["紫薇社康", "11月W4", "订阅", 125, 0], ["紫薇社康", "11月W5", "订阅", 138, 0], ["和联社康", "8月W4", "触达", 0, 0], ["和联社康", "8月W5", "触达", 100, 7], ["和联社康", "9月W1", "触达", 330, 0], ["和联社康", "9月W2", "触达", 415, 0], ["和联社康", "9月W3", "触达", 515, 0], ["和联社康", "9月W4", "触达", 615, 0], ["和联社康", "9月W5", "触达", 715, 0], ["和联社康", "10月W1", "触达", 715, 0], ["和联社康", "10月W2", "触达", 1000, 0], ["和联社康", "10月W3", "触达", 1375, 0], ["和联社康", "10月W4", "触达", 1700, 0], ["和联社康", "10月W5", "触达", 1975, 0], ["和联社康", "11月W1", "触达", 2275, 0], ["和联社康", "11月W2", "触达", 2750, 0], ["和联社康", "11月W3", "触达", 3000, 0], ["和联社康", "11月W4", "触达", 3250, 0], ["和联社康", "11月W5", "触达", 3750, 0], ["和联社康", "8月W4", "体验", 0, 7], ["和联社康", "8月W5", "体验", 20, 6], ["和联社康", "9月W1", "体验", 50, 0], ["和联社康", "9月W2", "体验", 100, 0], ["和联社康", "9月W3", "体验", 150, 0], ["和联社康", "9月W4", "体验", 200, 0], ["和联社康", "9月W5", "体验", 250, 0], ["和联社康", "10月W1", "体验", 250, 0], ["和联社康", "10月W2", "体验", 350, 0], ["和联社康", "10月W3", "体验", 450, 0], ["和联社康", "10月W4", "体验", 575, 0], ["和联社康", "10月W5", "体验", 675, 0], ["和联社康", "11月W1", "体验", 790, 0], ["和联社康", "11月W2", "体验", 905, 0], ["和联社康", "11月W3", "体验", 1020, 0], ["和联社康", "11月W4", "体验", 1135, 0], ["和联社康", "11月W5", "体验", 1250, 0], ["和联社康", "8月W4", "订阅", 0, 0], ["和联社康", "8月W5", "订阅", 0, 0], ["和联社康", "9月W1", "订阅", 5, 0], ["和联社康", "9月W2", "订阅", 10, 0], ["和联社康", "9月W3", "订阅", 15, 0], ["和联社康", "9月W4", "订阅", 20, 0], ["和联社康", "9月W5", "订阅", 25, 0], ["和联社康", "10月W1", "订阅", 25, 0], ["和联社康", "10月W2", "订阅", 60, 0], ["和联社康", "10月W3", "订阅", 70, 0], ["和联社康", "10月W4", "订阅", 80, 0], ["和联社康", "10月W5", "订阅", 85, 0], ["和联社康", "11月W1", "订阅", 95, 0], ["和联社康", "11月W2", "订阅", 105, 0], ["和联社康", "11月W3", "订阅", 115, 0], ["和联社康", "11月W4", "订阅", 125, 0], ["和联社康", "11月W5", "订阅", 138, 0], ["民治社康", "8月W4", "触达", 0, 0], ["民治社康", "9月W3", "体验", 150, 0], ["民治社康", "9月W4", "体验", 200, 0], ["民治社康", "9月W5", "体验", 250, 0], ["民治社康", "10月W1", "体验", 250, 0], ["民治社康", "10月W2", "体验", 350, 0], ["民治社康", "10月W3", "体验", 450, 0], ["民治社康", "10月W4", "体验", 575, 0], ["民治社康", "10月W5", "体验", 675, 0], ["民治社康", "11月W1", "体验", 790, 0], ["民治社康", "11月W2", "体验", 905, 0], ["民治社康", "11月W3", "体验", 1020, 0], ["民治社康", "11月W4", "体验", 1135, 0], ["民治社康", "11月W5", "体验", 1250, 0], ["民治社康", "8月W4", "订阅", 0, 0], ["民治社康", "8月W5", "订阅", 0, 0], ["民治社康", "9月W1", "订阅", 5, 0], ["民治社康", "9月W2", "订阅", 10, 0], ["民治社康", "9月W3", "订阅", 15, 0], ["民治社康", "9月W4", "订阅", 20, 0], ["民治社康", "9月W5", "订阅", 25, 0], ["民治社康", "10月W1", "订阅", 25, 0], ["民治社康", "10月W2", "订阅", 60, 0], ["民治社康", "10月W3", "订阅", 70, 0], ["民治社康", "10月W4", "订阅", 80, 0], ["民治社康", "10月W5", "订阅", 85, 0], ["民治社康", "11月W1", "订阅", 95, 0], ["民治社康", "11月W2", "订阅", 105, 0], ["民治社康", "11月W3", "订阅", 115, 0], ["民治社康", "11月W4", "订阅", 125, 0], ["民治社康", "11月W5", "订阅", 138, 0], ["民治社康", "8月W5", "触达", 100, 5], ["民治社康", "9月W1", "触达", 330, 0], ["民治社康", "9月W2", "触达", 415, 0], ["民治社康", "9月W3", "触达", 515, 0], ["民治社康", "9月W4", "触达", 615, 0], ["民治社康", "9月W5", "触达", 715, 0], ["民治社康", "10月W1", "触达", 715, 0], ["民治社康", "10月W2", "触达", 1000, 0], ["民治社康", "10月W3", "触达", 1375, 0], ["民治社康", "10月W4", "触达", 1700, 0], ["民治社康", "10月W5", "触达", 1975, 0], ["民治社康", "11月W1", "触达", 2275, 0], ["民治社康", "11月W2", "触达", 2750, 0], ["民治社康", "11月W3", "触达", 3000, 0], ["民治社康", "11月W4", "触达", 3250, 0], ["民治社康", "11月W5", "触达", 3750, 0], ["民治社康", "8月W4", "体验", 0, 5], ["民治社康", "8月W5", "体验", 20, 2], ["民治社康", "9月W1", "体验", 50, 0], ["民治社康", "9月W2", "体验", 100, 0], ["吉祥里社康", "8月W4", "触达", 0, 0], ["吉祥里社康", "8月W5", "触达", 100, 36], ["吉祥里社康", "9月W1", "触达", 330, 0], ["吉祥里社康", "9月W2", "触达", 415, 0], ["吉祥里社康", "9月W3", "触达", 515, 0], ["吉祥里社康", "9月W4", "触达", 615, 0], ["吉祥里社康", "9月W5", "触达", 715, 0], ["吉祥里社康", "10月W1", "触达", 715, 0], ["吉祥里社康", "10月W2", "触达", 1000, 0], ["吉祥里社康", "10月W3", "触达", 1375, 0], ["吉祥里社康", "10月W4", "触达", 1700, 0], ["吉祥里社康", "10月W5", "触达", 1975, 0], ["吉祥里社康", "11月W1", "触达", 2275, 0], ["吉祥里社康", "11月W2", "触达", 2750, 0], ["吉祥里社康", "11月W3", "触达", 3000, 0], ["吉祥里社康", "11月W4", "触达", 3250, 0], ["吉祥里社康", "11月W5", "触达", 3750, 0], ["吉祥里社康", "8月W4", "体验", 0, 0], ["吉祥里社康", "8月W5", "体验", 20, 17], ["吉祥里社康", "9月W1", "体验", 50, 0], ["吉祥里社康", "9月W2", "体验", 100, 0], ["吉祥里社康", "9月W3", "体验", 150, 0], ["吉祥里社康", "9月W4", "体验", 200, 0], ["吉祥里社康", "9月W5", "体验", 250, 0], ["吉祥里社康", "10月W1", "体验", 250, 0], ["吉祥里社康", "10月W2", "体验", 350, 0], ["吉祥里社康", "10月W3", "体验", 450, 0], ["吉祥里社康", "10月W4", "体验", 575, 0], ["吉祥里社康", "10月W5", "体验", 675, 0], ["吉祥里社康", "11月W1", "体验", 790, 0], ["吉祥里社康", "11月W2", "体验", 905, 0], ["吉祥里社康", "11月W3", "体验", 1020, 0], ["吉祥里社康", "11月W4", "体验", 1135, 0], ["吉祥里社康", "11月W5", "体验", 1250, 0], ["吉祥里社康", "8月W4", "订阅", 0, 0], ["吉祥里社康", "8月W5", "订阅", 0, 0], ["吉祥里社康", "9月W1", "订阅", 5, 0], ["吉祥里社康", "9月W2", "订阅", 10, 0], ["吉祥里社康", "9月W3", "订阅", 15, 0], ["吉祥里社康", "9月W4", "订阅", 20, 0], ["吉祥里社康", "9月W5", "订阅", 25, 0], ["吉祥里社康", "10月W1", "订阅", 25, 0], ["吉祥里社康", "10月W2", "订阅", 60, 0], ["吉祥里社康", "10月W3", "订阅", 70, 0], ["吉祥里社康", "10月W4", "订阅", 80, 0], ["吉祥里社康", "10月W5", "订阅", 85, 0], ["吉祥里社康", "11月W1", "订阅", 95, 0], ["吉祥里社康", "11月W2", "订阅", 105, 0], ["吉祥里社康", "11月W3", "订阅", 115, 0], ["吉祥里社康", "11月W4", "订阅", 125, 0], ["吉祥里社康", "11月W5", "订阅", 138, 0]], "mt": [["总体-触达", 857, 2000, 4857, 6571], ["和联社康-触达-月度", 100, 615, 1260, 1775], ["和联社康-体验-月度", 20, 230, 425, 575], ["和联社康-订阅-月度", 0, 25, 60, 53], ["鹭湖社康-订阅-月度", 0, 25, 60, 53], ["紫薇社康-触达-月度", 100, 615, 1260, 1775], ["紫薇社康-体验-月度", 20, 230, 425, 575], ["紫薇社康-订阅-月度", 0, 25, 60, 53], ["总体-体验", 80, 1000, 1700, 2300], ["总体-订阅", 0, 100, 170, 230], ["鹭湖社康-触达-月度", 100, 615, 1260, 1775], ["鹭湖社康-体验-月度", 20, 230, 425, 575], ["民治社康-触达-月度", 100, 615, 1260, 1775], ["民治社康-体验-月度", 20, 230, 425, 575], ["民治社康-订阅-月度", 0, 25, 60, 53], ["吉祥里社康-触达-月度", 100, 615, 1260, 1775], ["吉祥里社康-体验-月度", 20, 230, 425, 575], ["吉祥里社康-订阅-月度", 0, 25, 60, 53]]};
+const M = DATA.meta;
+const SK = DATA.sk;
+const STAGE = ['触达','体验','订阅'];
+const STAGE_COLOR = {'触达':'#61BEAD','体验':'#2A9D8F','订阅':'#0E5B51'};
+const SUB_DEFS = [
+  {k:'门诊',    c:'#2A9D8F'},
+  {k:'社区活动',c:'#3D7EAA'},
+  {k:'企业活动',c:'#D99A3D'},
+  {k:'自行拓展',c:'#8A9A93'}
+];
+const REF = new Date(M.refDate+'T00:00:00');
+/* ===== 数据链接（运营接口） ===== */
+const DEFAULT_BASE = 'https://api-xintai.colofoo.com/admin';
+const DEFAULT_BITABLE = 'https://ucn9pv6z2cnu.feishu.cn/base/B1wVbyEmjaBuNDsMsavcStSvnlc';
+let S = { baseUrl:DEFAULT_BASE, token:'', tokenInfo:null, tokenExpireAt:'', ageSync:{}, ageSyncAt:'', syncStat:null, bucketEdges:[40,50,60,70], bitableUrl:DEFAULT_BITABLE };
+function loadSettings(){ try{ const s=localStorage.getItem('ops_link_v1'); if(s) S=Object.assign(S,JSON.parse(s)); }catch(e){} }
+function saveSettings(){ try{ localStorage.setItem('ops_link_v1', JSON.stringify(S)); }catch(e){} }
+function escAttr(s){ return esc(s).replace(/"/g,'&quot;'); }
+async function api(path, method, body){
+  let res;
+  try{
+    res = await fetch(S.baseUrl+path, { method: method||'GET', headers:{ 'Content-Type':'application/json', ...(S.token?{'ops-token':S.token}:{}) }, body: body?JSON.stringify(body):undefined });
+  }catch(e){ throw new Error('无法连接接口（可能为跨域限制/网络不通）：'+e.message); }
+  const txt = await res.text(); let j;
+  try{ j=JSON.parse(txt); }catch(e){ throw new Error('接口返回异常（HTTP '+res.status+'），请检查基地址'); }
+  if(res.status===401) throw new Error('token 缺失/过期/无效（401），请重新登录');
+  if(j.code!==200) throw new Error(j.msg||'接口错误 code='+j.code);
+  return j.data;
+}
+/* ===== 全局年龄筛选 ===== */
+/* ===== 全局年龄筛选（接口精确年龄分桶，可配置） ===== */
+let curAge = '全部';
+let curCat = '全部';
+let curSrc = '全部';
+function bucketEdges(){ return (Array.isArray(S.bucketEdges)&&S.bucketEdges.length>1)?S.bucketEdges.slice():[40,50,60,70]; }
+function bucketLabels(edges){
+  const ls=[];
+  edges.forEach((e,i)=>{ ls.push(i===0 ? e+'以下' : (edges[i-1]+'-'+(e-1))); });
+  ls.push(edges[edges.length-1]+'+');
+  return ls;
+}
+function ageOptions(){ return ['全部'].concat(bucketLabels(bucketEdges())); }
+function ageSupported(layer){
+  if(layer==='触达') return true;                    // 登记表年龄段恒有
+  if(layer==='体验') return DATA.exp.some(r=>ageOf(r[1])!=null);
+  return false;
+}
+function ageBucket(age){
+  if(age==null||age==='') return '';
+  const edges=bucketEdges(), ls=bucketLabels(edges);
+  for(let i=edges.length-1;i>=0;i--){ if(age>=edges[i]) return ls[i+1]; }
+  return ls[0];
+}
+function ageOf(name){ const a=S.ageSync[name]; return (a==null||a==='')?null:a; }
+function ageBucketOf(name){ return ageBucket(ageOf(name)); }
+function bandToAge(b){
+  if(!b) return null;
+  const s=String(b).trim();
+  const m1=s.match(/(\d+)\s*[-~—～]\s*(\d+)/);
+  if(m1) return Math.round((parseInt(m1[1])+parseInt(m1[2]))/2);
+  const m2=s.match(/(\d+)/);
+  if(!m2) return null;
+  const v=parseInt(m2[1]);
+  if(s.indexOf('以下')>=0) return Math.max(0, v-5);
+  return v+5;   // 含"以上"/"+"或裸数字
+}
+function userAge(layer, r){
+  if(layer==='触达'){ const a=bandToAge(r[4]); return a!=null?{age:a,src:'登记表',raw:r[4]}:{age:null,src:'—',raw:''}; }
+  if(layer==='体验'){ const a=ageOf(r[1]); return a!=null?{age:a,src:'接口',raw:''}:{age:null,src:'未同步',raw:''}; }
+  if(layer==='订阅'){ const a=ageOf(r[1]); return a!=null?{age:a,src:'接口',raw:''}:{age:null,src:'未同步',raw:''}; }
+  return {age:null,src:'—',raw:''};
+}
+function userBucketFor(layer, r){ return ageBucket(userAge(layer,r).age); }
+function layerHasCat(layer){ return layer==='体验' || layer==='订阅'; }
+function srcLabel(v){ return v==='医生介绍'?'门诊':v; }
+function drillSrc(sk, src){ curSrc=src; go('#/layer/触达/'+encodeURIComponent(sk)); }
+function catOf(r){ return (r[2]||'').trim()||'未知'; }
+function expAgeCoverage(){ const n=DATA.exp.length; const m=DATA.exp.filter(r=>ageOf(r[1])!=null).length; return {n,m,pct:n?Math.round(m/n*100):0}; }
+function touchAgeCoverage(){ const n=DATA.reg.length; const m=DATA.reg.filter(r=>bandToAge(r[4])!=null).length; return {n,m,pct:n?Math.round(m/n*100):0}; }
+function layerCoverage(){ return {touch:touchAgeCoverage(), exp:expAgeCoverage()}; }
+function calcAge(birthday){
+  if(!birthday) return null;
+  const b=new Date(birthday), n=new Date(M.refDate+'T00:00:00');
+  let a=n.getFullYear()-b.getFullYear();
+  if(n.getMonth()<b.getMonth()||(n.getMonth()===b.getMonth()&&n.getDate()<b.getDate())) a--;
+  return a>=0?a:null;
+}
+function fmtNow(){ const d=new Date(); const p=x=>String(x).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes()); }
+function ageDist(){
+  const buckets={}; bucketLabels(bucketEdges()).forEach(b=>buckets[b]=0);
+  let min=999,max=-1,known=0;
+  Object.values(S.ageSync).forEach(a=>{
+    if(a==null) return; known++;
+    const b=ageBucket(a); if(buckets[b]!=null) buckets[b]++;
+    if(a<min)min=a; if(a>max)max=a;
+  });
+  return {buckets, min:min===999?null:min, max:max===-1?null:max, known};
+}
+function currentLayerForAge(){
+  const h=decodeURIComponent(location.hash||'');
+  if(h.indexOf('体验')>=0) return '体验';
+  return '触达';
+}
+function ageFilterHTML(){
+  const lc = layerCoverage();
+  let note;
+  if(curAge==='全部'){
+    note = (lc.exp.m>0)
+      ? '触达 '+lc.touch.m+'/'+lc.touch.n+'（登记表年龄段）· 体验 '+lc.exp.m+'/'+lc.exp.n+'（接口精确年龄 '+lc.exp.pct+'%）· 订阅暂无年龄'
+      : '体验层未同步接口年龄（「设置」页登录并同步后解锁体验层年龄），触达层按登记表年龄段';
+  } else {
+    note = '当前筛选 '+curAge+' · 触达按登记表年龄段映射，体验按接口精确年龄，订阅无年龄';
+  }
+  const btns = ageOptions().map(a=>'<span class="fbtn'+(a===curAge?' on':'')+'" data-age="'+a+'">'+a+'</span>').join('');
+  const cbtns = ['全部','个人用户','医护人员'].map(c=>'<span class="fbtn'+(c===curCat?' on':'')+'" data-cat="'+c+'">'+c+'</span>').join('');
+  const cnote = (curCat!=='全部') ? ' · 分类 '+curCat+'（触达层无分类不参与）' : '';
+  return '<div class="filterbar"><span class="fb-label">年龄段</span>' + btns + '<span class="fb-sep"></span><span class="fb-label">用户分类</span>' + cbtns + '<span class="fb-note">'+note+cnote+'</span></div>';
+}
+function ageDistHTML(){
+  const d=ageDist();
+  if(d.known===0) return '';
+  const total=d.known;
+  let h='<div class="adist"><div class="adhead">接口年龄分布（已同步 '+d.known+' 人 · 当前分桶）</div>';
+  Object.keys(d.buckets).forEach(b=>{
+    const n=d.buckets[b]||0, p=total?Math.round(n/total*100):0;
+    h+='<div class="adrow"><span class="al">'+b+'</span><div class="atrack"><i style="width:'+p+'%"></i></div><span class="an">'+n+' 人 · '+p+'%</span></div>';
+  });
+  h+='<div class="ameta">年龄范围 '+(d.min!=null?d.min:'—')+' ~ '+(d.max!=null?d.max:'—')+' 岁 · 未同步用户不计入年龄段统计</div></div>';
+  return h;
+}
+function funnelHintText(){
+  let s = (curAge==='全部'?'各层级人数':'各层级人数 · 触达按登记表年龄段映射，体验按接口精确年龄，订阅无年龄');
+  if(curCat!=='全部') s += ' · 分类 '+curCat+'（仅作用于体验/订阅层）';
+  return s;
+}
+function trendHintText(){
+  let s = (curAge==='全部'?'触达（登记）与体验（佩戴开始）每日新增':'触达（登记 · '+curAge+'）与体验（佩戴开始 · '+curAge+'）每日新增');
+  if(curCat!=='全部') s += ' · 分类 '+curCat;
+  return s;
+}
+function flash(msg){ const el=document.getElementById('smsg'); if(el){ el.textContent=msg; el.className='smsg'; } }
+function saveBase(){ const v=document.getElementById('inBase').value.trim(); if(!v) return; S.baseUrl=v; saveSettings(); flash('接口基地址已保存'); }
+function saveBitable(){ const v=document.getElementById('inBitable').value.trim(); if(!v) return; S.bitableUrl=v; saveSettings(); flash('多维表链接已保存'); }
+async function doSendCode(){
+  const acc=document.getElementById('inAcc').value.trim();
+  if(!acc){ flash('请输入管理端账号或绑定手机号'); return; }
+  const btn=document.getElementById('btnSend'); btn.disabled=true; btn.textContent='发送中…';
+  try{ await api('/ops/auth/sendCode','POST',{account:acc}); flash('若账号有效，验证码已发送至绑定手机，2 分钟内有效'); }
+  catch(e){ flash(e.message); }
+  btn.disabled=false; btn.textContent='发送验证码';
+}
+async function doLogin(){
+  const acc=document.getElementById('inAcc').value.trim(), code=document.getElementById('inCode').value.trim();
+  if(!acc||!code){ flash('请输入账号和验证码'); return; }
+  try{
+    const d=await api('/ops/auth/login','POST',{account:acc,code});
+    S.token=d.token; S.tokenInfo={operatorName:d.operatorName,deptName:d.deptName,scopeDeptCount:d.scopeDeptCount,phone:d.phone};
+    const exp=new Date(); exp.setDate(exp.getDate()+3);
+    S.tokenExpireAt=exp.getFullYear()+'-'+String(exp.getMonth()+1).padStart(2,'0')+'-'+String(exp.getDate()).padStart(2,'0');
+    saveSettings(); renderSettings();
+    doSyncAges();
+  }catch(e){ flash(e.message); }
+}
+async function doLogout(){
+  try{ if(S.token) await api('/ops/auth/logout','POST'); }catch(e){}
+  S.token=''; S.tokenInfo=null; S.tokenExpireAt=''; saveSettings(); renderSettings();
+}
+async function doSyncAges(){
+  if(!S.token){ flash('请先登录'); return; }
+  try{
+    let page=1, all=[], total=0;
+    while(true){
+      const d=await api('/ops/data/users?pageNum='+page+'&pageSize=200');
+      all=all.concat(d.records||[]); total=d.total;
+      if(all.length>=total||page>60) break;
+      page++;
+    }
+    const byName={};
+    all.forEach(u=>{
+      const nm=(u.userName||'').trim(), nk=(u.nickName||'').trim();
+      if(nm) (byName[nm]=byName[nm]||[]).push(u);
+      if(nk && nk!==nm) (byName[nk]=byName[nk]||[]).push(u);
+    });
+    const names=Array.from(new Set(
+      DATA.exp.map(r=>r[1]).concat(DATA.sub.length?DATA.sub.map(r=>r[1]):[]).filter(Boolean)
+    ));
+    const sync={}; let matched=0, multi=0, none=0;
+    names.forEach(nm=>{
+      const cands=byName[nm]||[];
+      if(cands.length===1){ const age=calcAge(cands[0].birthday); if(age!=null){ sync[nm]=age; matched++; } else none++; }
+      else if(cands.length>1) multi++;
+      else none++;
+    });
+    S.ageSync=sync; S.ageSyncAt=fmtNow(); S.syncStat={matched,none,multi,users:all.length};
+    saveSettings(); route();
+    flash('年龄已与接口同步：匹配 '+matched+' 人 / 未匹配 '+none+' / 重名 '+multi+'（接口共 '+all.length+' 用户）');
+  }catch(e){ flash(e.message); }
+}
+function doClearSync(){ S.ageSync={}; S.ageSyncAt=''; S.syncStat=null; saveSettings(); renderSettings(); }
+function saveBuckets(){
+  const v=(document.getElementById('inBuckets').value||'').trim();
+  const arr=v.split(/[,，\s]+/).map(Number).filter(n=>Number.isFinite(n)&&n>0&&n<100).sort((a,b)=>a-b);
+  if(arr.length<2){ flash('请输入至少 2 个分界年龄，如 40,50,60,70'); return; }
+  S.bucketEdges=arr; saveSettings();
+  if(ageOptions().indexOf(curAge)<0) curAge='全部';
+  renderSettings(); flash('年龄段分桶已更新为：'+bucketLabels(arr).join(' · '));
+}
+function setBuckets(){
+  const arr=Array.prototype.slice.call(arguments);
+  S.bucketEdges=arr; saveSettings();
+  if(ageOptions().indexOf(curAge)<0) curAge='全部';
+  renderSettings();
+}
+function renderSettings(){
+  crumbHTML(['设置']);
+  const lc=layerCoverage();
+  let html='';
+  html += '<div class="pagehead"><h2 class="serif">数据链接设置 <span class="en">SETTINGS</span></h2>';
+  html += '<div class="sub">链接「运营数据查询接口」，从接口读取用户年龄，让体验层也能按年龄段下钻。</div>';
+  html += '<div class="note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>接口返回用户个人健康数据，仅限本看板经营分析使用，请勿外传。</div></div>';
+  const srcInfo = (DATA.meta && DATA.meta.src) ? DATA.meta.src : '内置快照';
+  const srcAt = (DATA.meta && DATA.meta.srcAt) ? DATA.meta.srcAt : '—';
+  html += '<div class="sec"><div class="sec-h"><h3>0 · 数据来源：飞书多维表</h3><span class="hint">明细（登记/体验/订阅/活动）与目标（目标管理/目标完成汇总）以飞书多维表为准；接口用于用户精确年龄</span></div><div class="panel">';
+  html += '<div class="srow"><span class="sl">多维表链接</span><input id="inBitable" class="inp" value="'+escAttr(S.bitableUrl)+'"><button class="btn" onclick="saveBitable()">保存</button></div>';
+  html += '<div class="srow"><span class="sl">当前数据</span><div class="sinfo">来源 <b>'+esc(srcInfo)+'</b> · 拉取于 <b>'+esc(srcAt)+'</b> · 登记 <b>'+fmt(DATA.reg.length)+'</b> · 体验 <b>'+fmt(DATA.exp.length)+'</b> · 订阅 <b>'+fmt(DATA.sub.length)+'</b> · 周目标 <b>'+fmt(DATA.weekly.length)+'</b> · 月度目标 <b>'+fmt(DATA.mt.length)+'</b></div></div>';
+  html += '<div class="srow"><span class="sl">拉取最新数据</span><button class="btn primary" onclick="flash(\'请让 AI 助手执行「从飞书多维表拉取最新数据」，由助手通过飞书连接器拉取并写入看板\')">从飞书多维表拉取</button><div class="sinfo" style="min-width:220px">飞书连接器拉取后写入看板内嵌数据；若多维表活动表为空，保留看板现有活动。</div></div>';
+  html += '</div></div>';
+  html += '<div class="sec"><div class="sec-h"><h3>1 · 数据接口登录</h3><span class="hint">基地址默认 '+DEFAULT_BASE+'；token 有效期 3 天</span></div><div class="panel">';
+  html += '<div class="srow"><span class="sl">接口基地址</span><input id="inBase" class="inp" value="'+escAttr(S.baseUrl)+'"><button class="btn" onclick="saveBase()">保存</button></div>';
+  if(S.token){
+    const t=S.tokenInfo||{};
+    html += '<div class="srow"><span class="sl">登录状态</span><div class="sinfo">已登录：<b>'+esc(t.operatorName||'—')+'</b> · '+esc(t.deptName||'—')+' · 可查部门 <b>'+esc(t.scopeDeptCount==null?'—':t.scopeDeptCount)+'</b> 个 · token 有效期至 '+esc(S.tokenExpireAt||'—')+'</div><button class="btn danger" onclick="doLogout()">注销</button></div>';
+    html += '<div class="smsg" id="smsg"></div>';
+  } else {
+    html += '<div class="srow"><span class="sl">管理端账号</span><input id="inAcc" class="inp" placeholder="账号或绑定手机号"><button class="btn" onclick="doSendCode()" id="btnSend">发送验证码</button></div>';
+    html += '<div class="srow"><span class="sl">验证码</span><input id="inCode" class="inp" placeholder="4 位验证码"><button class="btn primary" onclick="doLogin()">登录</button></div>';
+    html += '<div class="smsg" id="smsg"></div>';
+  }
+  html += '</div></div>';
+  html += '<div class="sec"><div class="sec-h"><h3>2 · 用户年龄同步</h3><span class="hint">登录后自动同步，也可手动点击；按姓名/昵称匹配体验与订阅用户，写入接口精确年龄；登记表无姓名，用年龄段粗档映射</span></div><div class="panel">';
+  html += '<div class="srow"><span class="sl">年龄覆盖率</span><div class="sinfo">触达 <b>'+lc.touch.m+'/'+lc.touch.n+'</b>（登记表年龄段）· 体验 <b>'+lc.exp.m+'/'+lc.exp.n+'</b>（接口精确年龄 '+lc.exp.pct+'%）'+(S.ageSyncAt?' · 最近同步 '+S.ageSyncAt:'')+'</div><button class="btn primary" onclick="doSyncAges()" '+(S.token?'':'disabled')+'>从接口同步年龄</button></div>';
+  if(!S.token) html += '<div class="smsg warn">请先完成第 1 步登录，再同步年龄。</div>';
+  if(S.syncStat) html += '<div class="sstat"><b>上次同步：</b>匹配成功 '+S.syncStat.matched+' 人 · 未匹配 '+S.syncStat.none+' 人 · 重名待确认 '+S.syncStat.multi+' 人（用户池 '+S.syncStat.users+' 人）</div>';
+  html += ageDistHTML();
+  html += '<div class="srow"><span class="sl">清除同步</span><button class="btn danger" onclick="doClearSync()">清除已同步年龄</button></div>';
+  html += '<div class="smsg note2">匹配口径：接口用户列表按「姓名」精确匹配体验表用户。重名不自动写入（需人工确认）；未同步用户不计入年龄段统计。后续补手机号可升级为手机号精确匹配。</div>';
+  html += '</div></div>';
+  html += '<div class="sec"><div class="sec-h"><h3>3 · 年龄段分桶配置</h3><span class="hint">接口返回精确年龄，按此分桶；筛选选项将随配置实时变化</span></div><div class="panel">';
+  html += '<div class="srow"><span class="sl">当前分桶</span><div class="sinfo">'+bucketLabels(bucketEdges()).join(' &nbsp;·&nbsp; ')+'</div></div>';
+  html += '<div class="srow"><span class="sl">各档上界（岁）</span><input id="inBuckets" class="inp" value="'+S.bucketEdges.join(',')+'" placeholder="如 40,50,60,70"><button class="btn primary" onclick="saveBuckets()">保存</button></div>';
+  html += '<div class="srow"><span class="sl">预设</span><button class="btn" onclick="setBuckets(40,50,60,70)">默认 40/50/60/70</button><button class="btn" onclick="setBuckets(30,40,50,60,70)">细分 30/40/50/60/70</button><button class="btn" onclick="setBuckets(50,60,70)">登记口径 50/60/70</button></div>';
+  html += '<div class="smsg note2">分桶上界示例：输入 40,50,60,70 生成「40以下 / 40-49 / 50-59 / 60-69 / 70+」。已同步的精确年龄与登记表年龄段映射都会按新分桶重新归类。</div>';
+  html += '<div class="smsg note2">登记表年龄段 → 代表年龄映射：50以下→45 · 51-60→55 · 61-70→65 · 70以上→75（取中点折算，再归入当前分桶；明细中标注「登记」来源）。</div>';
+  html += '<div class="smsg note2">用户分类（个人用户 / 医护人员）来自体验表「分类」字段，触达登记表无分类字段。</div></div></div>';
+  html += '</div></div>';
+  html += '<div class="sec"><div class="sec-h"><h3>4 · 各层年龄数据来源</h3></div><div class="panel"><table class="stab"><tr><th>层级</th><th>年龄来源</th><th>当前状态</th></tr>';
+  html += '<tr><td>触达（登记表）</td><td>登记表「年龄段」粗档映射</td><td>'+lc.touch.m+'/'+lc.touch.n+' 人（代表年龄归入当前分桶）</td></tr>';
+  html += '<tr><td>体验（体验表）</td><td>接口按姓名同步精确年龄</td><td>'+(lc.exp.m>0?'已同步 '+lc.exp.m+'/'+lc.exp.n+' 人':'未同步')+'</td></tr>';
+  html += '<tr><td>订阅（订阅表）</td><td>暂无数据源</td><td>—</td></tr></table>';
+  $('#app').innerHTML=html;
+}
+
+/* ============ 工具 ============ */
+function $(s,el){return (el||document).querySelector(s)}
+function $$(s,el){return Array.from((el||document).querySelectorAll(s))}
+function fmt(n){return (n==null?'—':Number(n).toLocaleString('zh-CN'))}
+function pct(part,whole){ if(whole==null||whole===0) return null; return Math.round(part/whole*1000)/10 }
+function rateCls(v){ if(v==null) return ''; if(v>=100) return 'rate-ok'; if(v>=80) return 'rate-warn'; return 'rate-bad' }
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function weekOf(s){ return s>=M.weekStart && s<=M.weekEnd }
+function monthOf(s){ return s && s.slice(0,7)===M.monthStart.slice(0,7) }
+function fmtLocal(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0') }
+
+/* ===== 明细层统计（实时） ===== */
+function layerRows(layer, sk){
+  let rows = (layer==='触达') ? DATA.reg : (layer==='体验') ? DATA.exp : DATA.sub;
+  if(sk) rows = rows.filter(r=>r[0]===sk);
+  if(curAge!=='全部'){
+    if(layer==='触达') rows = rows.filter(r=>userBucketFor('触达',r)===curAge);
+    else if(layer==='体验' && ageSupported('体验')) rows = rows.filter(r=>userBucketFor('体验',r)===curAge);
+  }
+  if(curCat!=='全部' && layerHasCat(layer)) rows = rows.filter(r=>catOf(r)===curCat);
+  if(curSrc!=='全部' && layer==='触达'){
+    if(curSrc==='自行拓展') rows = rows.filter(r=>!['医生介绍','社区活动','企业活动'].includes(r[2]));
+    else rows = rows.filter(r=>r[2]===curSrc);
+  }
+  return rows;
+}
+function timeField(layer,r){
+  if(layer==='触达') return r[1];      // 记录时间
+  if(layer==='体验') return r[5];      // 佩戴体验开始
+  return r[0];                         // 订阅开始
+}
+function periodStats(layer, sk){
+  const rows = layerRows(layer,sk);
+  let today=0,week=0,month=0;
+  rows.forEach(r=>{
+    const t=timeField(layer,r);
+    if(!t) return;
+    if(t===M.refDate) today++;
+    if(weekOf(t)) week++;
+    if(monthOf(t)) month++;
+  });
+  return {today,week,month,total:rows.length};
+}
+/* 体验：进行中（已开始未结束） */
+function expActive(sk){
+  let rows = DATA.exp.filter(r=>(!sk||r[0]===sk) && r[5] && !r[6]);
+  if(curAge!=='全部' && ageSupported('体验')) rows = rows.filter(r=>userBucketFor('体验',r)===curAge);
+  if(curCat!=='全部') rows = rows.filter(r=>catOf(r)===curCat);
+  return rows.length;
+}
+function layerAgeRows(layer, sk){
+  let rows = (layer==='触达') ? DATA.reg : (layer==='体验') ? DATA.exp : [];
+  if(sk) rows = rows.filter(r=>r[0]===sk);
+  if(curCat!=='全部' && layerHasCat(layer)) rows = rows.filter(r=>catOf(r)===curCat);
+  if(curSrc!=='全部' && layer==='触达'){
+    if(curSrc==='自行拓展') rows = rows.filter(r=>!['医生介绍','社区活动','企业活动'].includes(r[2]));
+    else rows = rows.filter(r=>r[2]===curSrc);
+  }
+  return rows;
+}
+function ageDistStats(layer, sk){
+  const rows = layerAgeRows(layer, sk);
+  const buckets = {}; ageOptions().forEach(b=>buckets[b]=0);
+  const ages=[];
+  rows.forEach(r=>{
+    const ua = userAge(layer, r);
+    if(ua.age==null) return;
+    ages.push(ua.age);
+    const bk = ageBucket(ua.age);
+    if(buckets[bk]!=null) buckets[bk]++;
+  });
+  const known=ages.length;
+  ages.sort((a,b)=>a-b);
+  const avg = known? Math.round(ages.reduce((a,b)=>a+b,0)/known*10)/10 : null;
+  const med = known? (known%2? ages[(known-1)/2] : Math.round((ages[known/2-1]+ages[known/2])/2)) : null;
+  return {buckets, known, total:rows.length, avg, med, min:known?ages[0]:null, max:known?ages[known-1]:null};
+}
+function drawAgeDistChart(layer, sk){
+  const ag = ageDistStats(layer, sk);
+  const labels = ageOptions().slice(1);
+  const data = labels.map(b=>ag.buckets[b]||0);
+  makeChart('cAgeDist', {
+    tooltip:{trigger:'axis',confine:true,axisPointer:{type:'shadow'},valueFormatter:v=>v+' 人'},
+    grid:{left:8,right:16,top:34,bottom:8,containLabel:true},
+    xAxis:{type:'category',data:labels,axisLine:{lineStyle:{color:'#CBD5CC'}},axisLabel:{color:'#8A9891',fontSize:12},axisTick:{show:false}},
+    yAxis:{type:'value',splitLine:{lineStyle:{color:'#EDF1EB'}},axisLabel:{color:'#8A9891',fontSize:11}},
+    series:[{type:'bar',data:data.map(v=>({value:v,itemStyle:{color:'#2A9D8F',borderRadius:[4,4,0,0]}})),barWidth:'52%',
+      label:{show:true,position:'top',color:'#0E5B51',fontSize:12,fontWeight:600,formatter:p=>p.value||''}}]
+  });
+}
+
+/* ===== 目标（目标完成汇总表口径） ===== */
+function weeklyRow(dim,week,stage){
+  const hit = DATA.weekly.find(w=>w[0]===dim && w[1]===week && w[2]===stage);
+  return hit?{target:hit[3],actual:hit[4]}:{target:0,actual:0};
+}
+function monthGoal(dim,stage){
+  let t=0,a=0;
+  DATA.weekly.forEach(w=>{
+    if(w[0]===dim && w[2]===stage && w[1].indexOf(M.month)===0){ t+=w[3]; a+=w[4]; }
+  });
+  return {target:t,actual:a};
+}
+function mtMonth(name,month){ // 目标管理表月度目标（参考）
+  const row = DATA.mt.find(m=>m[0]===name);
+  if(!row) return null;
+  const idx = {8:1,9:2,10:3,11:4}[parseInt(month)];
+  return row[idx];
+}
+
+/* ===== 路由 ===== */
+let navStack=[];
+function go(h){ const cur=location.hash||'#/overview'; if(navStack[navStack.length-1]!==cur) navStack.push(cur); location.hash=h; }
+function goBack(){ if(navStack.length){ location.hash=navStack.pop(); } else { location.hash='#/overview'; } }
+function route(){
+  const h = location.hash || '#/overview';
+  setNav(h);
+  let m;
+  if(h==='#/settings') return renderSettings();
+  if(h==='#/overview') return renderOverview();
+  if((m=h.match(/^#\/layer\/([^/]+)\/([^/]+)$/))) return renderLayer(decodeURIComponent(m[1]), decodeURIComponent(m[2]));
+  if((m=h.match(/^#\/layer\/([^/]+)$/))) return renderLayer(decodeURIComponent(m[1]), null);
+  if((m=h.match(/^#\/sk\/([^/]+)$/))) return renderChannel(decodeURIComponent(m[1]));
+  return renderOverview();
+}
+function setNav(h){
+  let dec='';
+  try{ dec=decodeURIComponent(h); }catch(e){ dec=h; }
+  $$('#nav a').forEach(a=>{
+    const dh=a.getAttribute('data-h');
+    let on=false;
+    if(dh==='overview') on = (h==='#/overview' || dec.indexOf('#/sk/')===0);
+    else if(dh==='settings') on = dec.indexOf('#/settings')===0;
+    else on = dec.indexOf('#/layer/'+dh)===0;
+    a.classList.toggle('on',on);
+  });
+}
+function crumbHTML(parts){
+  const arr=[['<a onclick="go(\'#/overview\')" style="cursor:pointer">总览</a>']];
+  parts.forEach((p,i)=>{ arr.push(['<span class="sep">/</span>', i===parts.length-1?'<span class="cur">'+esc(p)+'</span>':'<span>'+esc(p)+'</span>']) });
+  $('#crumb').innerHTML = arr.flat().join('');
+}
+function svgArrow(){ return '<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>' }
+function heartbeatSVG(){ return '<svg viewBox="0 0 1240 46" preserveAspectRatio="none" style="width:100%;height:40px;display:block"><polyline points="0,23 280,23 300,23 312,23 322,10 334,36 344,23 356,23 420,23 436,23 448,23 458,10 470,36 480,23 492,23 560,23 576,23 588,23 598,10 610,36 620,23 632,23 700,23 716,23 728,23 738,10 750,36 760,23 772,23 840,23 856,23 868,23 878,10 890,36 900,23 912,23 980,23 996,23 1008,23 1018,10 1030,36 1040,23 1052,23 1240,23" fill="none" stroke="#C7DCD3" stroke-width="1.4"/></svg>' }
+
+/* ============ 视图：总览 ============ */
+function rateText(g){ const r=pct(g.actual,g.target); return r==null?'—':r+'%' }
+function insightText(){
+  if(curAge==='全部' && curCat==='全部'){
+    return '体验池（140 人）大于触达登记（43 人），主要因为体验含 7 月存量导入（60 人）、8 月新增 78 人。当前订阅尚未启动，下一步重点在放大 8 月触达端、推动体验转订阅。';
+  }
+  let s;
+  if(curCat!=='全部'){
+    s = '分类 <b>'+curCat+'</b>：体验层 <b>'+layerRows('体验').length+'</b> 人'+(curAge!=='全部'?'（年龄段 '+curAge+'）':'')+'。触达层登记表无分类字段，不参与分类筛选。';
+  } else {
+    const n = layerRows('触达').length;
+    s = '<b>'+curAge+'</b> 年龄段：触达登记 <b>'+n+'</b> 人（登记表年龄段映射）· 体验层按接口精确年龄统计。';
+  }
+  return s;
+}
+function renderOverview(){
+  crumbHTML(['漏斗总览']);
+  curSrc='全部';
+  const tot = STAGE.map(st=>({st, ps:periodStats(st)}));
+  const goalOverall = STAGE.map(st=>({st, g:monthGoal('总体',st)}));
+  const monthNum = parseInt(DATA.meta.month);
+  const skStats = SK.map(sk=>({sk, t:periodStats('触达',sk).total, e:periodStats('体验',sk).total, s:periodStats('订阅',sk).total, eAct:expActive(sk),
+    gt:monthGoal(sk,'触达'), ge:monthGoal(sk,'体验')}));
+
+  let html = '';
+  /* 页面头 */
+  html += '<div class="pagehead">';
+  html += '<h2 class="serif">经营看板 <span class="en">OVERVIEW</span></h2>';
+  html += '<div class="sub">渠道（5 家社康）→ 触达（登记）→ 体验 → 订阅。点开任意层级或社康，查看本日/本周/本月新增与目标进度。</div>';
+  html += '<div class="hrt">'+heartbeatSVG()+'</div>';
+  html += '<div class="note" style="margin-top:10px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg>数据来源：飞书多维表格（登记/体验/订阅明细 + 目标完成汇总表）。'+(M.src?(' · 多维表拉取于 '+M.srcAt):'')+M.noteTarget+'</div>';
+  html += '</div>';
+
+  /* 全局年龄筛选 */
+  html += ageFilterHTML();
+
+  /* 漏斗分析：左图右信息 */
+  html += '<div class="sec"><div class="sec-h"><h3>漏斗分析</h3><span class="hint">当前筛选：'+(curAge==='全部'?'全部年龄段':curAge)+(curCat!=='全部'?' · 分类 '+curCat:'')+' · 触达=登记表本月新增 · 体验=体验登记累计（含7月启动）· 点击右侧信息行下钻</span></div>';
+  html += '<div class="funnel-wrap">';
+  html += '<div class="panel"><h4>漏斗图</h4><div class="phint">'+funnelHintText()+'</div><div id="cFunnel" class="chart"></div></div>';
+  html += '<div class="finfo">';
+  STAGE.forEach((st,i)=>{
+    const ps=tot[i].ps, g=goalOverall[i].g, color=STAGE_COLOR[st];
+    let goalLabel='本月目标', goalVal=g.target;
+    if(st==='体验'){ const mv=mtMonth('总体-体验', monthNum); if(mv!=null){ goalLabel='新增体验目标'; goalVal=mv; } }
+    const rate=pct(g.actual, goalVal);
+    const nosup = curAge!=='全部' && !ageSupported(st);
+    const disp = (v)=> nosup ? (fmt(v)+'<span style="color:var(--warn)">*</span>') : fmt(v);
+    html += '<div class="frow" onclick="go(\'#/layer/'+encodeURIComponent(st)+'\')">';
+    html += '<div class="h"><span class="nm"><i style="background:'+color+'"></i>'+st+'用户</span><span class="cnt num">'+disp(ps.total)+'<small>累计</small></span></div>';
+    html += '<div class="meta">'+
+      '<span class="kw">今日 <b>'+disp(ps.today)+'</b></span>'+
+      '<span class="kw">本周 <b>'+disp(ps.week)+'</b></span>'+
+      '<span class="dim">本月 <b>'+disp(ps.month)+'</b></span>'+
+      (st==='触达' && curAge!=='全部' ? '<span class="dim">占全部触达 <b>'+pct(ps.total,DATA.reg.length)+'%</b></span>' : '')+
+    '</div>';
+    html += '<div class="goal"><span class="glab">'+goalLabel+' <b>'+fmt(goalVal)+'</b></span><span class="gsep">·</span><span class="gact">实际完成 <b>'+fmt(g.actual)+'</b></span><span class="gsep">·</span><span class="glvl '+rateCls(rate)+'">完成率 <b>'+(rate==null?'—':rate+'%')+'</b></span><div class="track"><i style="width:'+Math.min(100,rate||0)+'%;background:'+(rate>=100?'var(--ok)':rate>=80?'var(--warn)':'var(--brand2)')+'"></i></div></div>';
+    if(nosup) html += '<div class="agemsg">'+(st==='订阅'?'该层无年龄数据，年龄筛选下展示全量（*）':'体验层未同步接口年龄（「设置」页同步），年龄筛选下展示全量（*）')+'</div>';
+    if(curCat!=='全部' && st==='触达') html += '<div class="agemsg">触达层登记表无分类字段，分类筛选不作用于触达</div>';
+    html += '</div>';
+  });
+  html += '</div>';
+  html += '</div></div>';
+
+  /* 渠道层 */
+  html += '<div class="sec"><div class="sec-h"><h3>渠道层 · 5 家社康</h3><span class="hint">点击进入该社康详情</span></div>';
+  html += '<div class="skgrid">';
+  skStats.forEach(x=>{
+    const rt=pct(x.gt.actual,x.gt.target);
+    const ev=mtMonth(x.sk+'-体验-月度', monthNum) ?? x.ge.target;
+    const er=pct(x.ge.actual, ev);
+    html += '<div class="skcard" onclick="go(\'#/sk/'+encodeURIComponent(x.sk)+'\')">';
+    html += '<div class="nm"><span class="dot"></span>'+x.sk+'</div>';
+    html += '<div class="vals"><div class="v"><div class="n num" style="color:var(--st1)">'+fmt(x.t)+'</div><div class="l">触达</div></div>';
+    html += '<div class="v"><div class="n num" style="color:var(--st2)">'+fmt(x.e)+'</div><div class="l">体验</div></div>';
+    html += '<div class="v"><div class="n num" style="color:var(--st3)">'+fmt(x.s)+'</div><div class="l">订阅</div></div></div>';
+    html += '<div class="goal"><div class="t">本月触达目标 <span class="lvl '+rateCls(rt)+'">'+(rt==null?'—':rt+'%')+'</span></div><div class="track"><i style="width:'+Math.min(100,rt||0)+'%;background:'+(rt>=100?'var(--ok)':rt>=80?'var(--warn)':'var(--brand2)')+'"></i></div></div>';
+    html += '<div class="goal"><div class="t">新增体验目标 <span class="lvl '+rateCls(er)+'">'+(er==null?'—':er+'%')+'</span></div><div class="track"><i style="width:'+Math.min(100,er||0)+'%;background:'+(er>=100?'var(--ok)':er>=80?'var(--warn)':'var(--brand2)')+'"></i></div></div>';
+    html += '</div>';
+  });
+  html += '</div></div>';
+
+  /* 主分析区 */
+  html += '<div class="sec"><div class="grid2">';
+  html += '<div class="panel"><h4>近 30 日新增趋势</h4><div class="phint">'+trendHintText()+'</div><div id="cTrend" class="chart"></div></div>';
+  html += '<div class="panel"><h4>本月触达目标完成率</h4><div class="phint">按《目标完成汇总表》口径（目标不按年龄拆分）</div><div id="cGoal" class="chart"></div>';
+  html += '<div class="insight" style="margin-top:14px"><div class="lbl">核心判断</div>'+insightText()+'</div></div>';
+  html += '</div></div>';
+
+  $('#app').innerHTML = html;
+  drawFunnel(); drawTrend(); drawGoalBar();
+}
+
+/* ============ 视图：层级详情 ============ */
+function renderLayer(layer, sk){
+  crumbHTML([layer+'详情', sk||'全部社康']);
+  const isT = layer==='触达', isE = layer==='体验', isS = layer==='订阅';
+  const ps = periodStats(layer, sk);
+  const dim = sk || '总体';
+  const wk = weeklyRow(dim, M.week, layer);
+  const mo = monthGoal(dim, layer);
+  const wkRate = pct(wk.actual, wk.target);
+  const moRate = pct(mo.actual, mo.target);
+
+  let html = '';
+  html += '<div class="pagehead"><a class="back" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>'+(sk?'返回'+sk:'返回总览')+'</a>';
+  html += '<h2 class="serif">'+layer+'用户详情 <span class="en">'+(sk||'全部社康')+'</span></h2>';
+  html += '<div class="sub">'+layerDesc(layer,sk)+'</div>';
+  html += '<div class="note">'+M.noteTarget+'</div></div>';
+  html += ageFilterHTML();
+  if(layer==='触达' && curSrc!=='全部'){
+    html += '<div class="srcchip"><span>来源筛选：'+srcLabel(curSrc)+'</span><a onclick="curSrc=\'全部\';route()">× 清除</a></div>';
+  }
+
+  /* KPI：本日/本周/本月新增 */
+  html += '<div class="sec"><div class="sec-h"><h3>新增情况</h3><span class="hint">按明细表实时口径</span></div><div class="kpis">';
+  const kpis=[['今日',ps.today,'#2A9D8F','当日（'+M.refDate+'）'],['本周',ps.week,'#1F8A7A','本周（'+M.week+'，'+M.weekStart.slice(5)+' 起）'],['本月',ps.month,'#0E5B51','本月（'+M.month+'）']];
+  kpis.forEach(k=>{ html+='<div class="kpi"><div class="l"><span class="dot" style="background:'+k[2]+'"></span>'+k[0]+'新增</div><div class="n num">'+fmt(k[1])+'</div><div class="phint" style="margin:0">'+k[3]+'</div></div>' });
+  html += '</div></div>';
+
+  /* 目标对标 */
+  html += '<div class="sec"><div class="sec-h"><h3>目标对标</h3><span class="hint">目标与实际均来自《目标完成汇总表》</span></div><div class="goals">';
+  html += goalCard('本周目标', wk.target, wk.actual, wkRate, M.week);
+  html += goalCard('本月目标', mo.target, mo.actual, moRate, M.month+'（周目标合计）');
+  html += '</div></div>';
+
+  /* 子渠道构成 */
+  const subs = subChannels(layer, sk);
+  const maxSub = Math.max(1,...subs.map(s=>s.n));
+  html += '<div class="sec"><div class="sec-h"><h3>渠道构成</h3><span class="hint">'+(isT?'触达层：门诊=医生介绍，自行拓展=其他来源':'体验层：门诊=来源活动为空')+'</span></div>';
+  html += '<div class="subgrid">';
+  subs.forEach(s=>{
+    html += '<div class="subcard"><div class="nm"><i style="background:'+s.c+'"></i>'+s.k+'</div><div class="n num">'+fmt(s.n)+'</div><div class="p">占比 '+pct(s.n,subs.reduce((a,b)=>a+b.n,0))+'%</div></div>';
+  });
+  html += '</div></div>';
+
+  /* 年龄分布 */
+  const ag = ageDistStats(layer, sk);
+  const agHint = (layer==='触达') ? '触达=登记表年龄段映射' : (ag.known>0?'体验=接口精确年龄':'体验层未同步接口年龄（「设置」页同步）');
+  html += '<div class="sec"><div class="sec-h"><h3>年龄分布</h3><span class="hint">'+agHint+' · '+(sk||'全部社康')+(curCat!=='全部'?' · 分类 '+curCat:'')+' · '+ag.known+' 人有年龄</span></div>';
+  html += '<div class="grid2">';
+  html += '<div class="panel"><div id="cAgeDist" class="chart" style="min-height:240px"></div></div>';
+  html += '<div class="panel astats"><div class="ash"><h4>年龄汇总</h4></div>';
+  const arow=(k,v)=>'<div class="arow"><span>'+k+'</span><b>'+v+'</b></div>';
+  html += arow('有年龄用户', ag.known+' / '+ag.total+' 人');
+  html += arow('平均年龄', ag.avg!=null?ag.avg+' 岁':'—');
+  html += arow('中位年龄', ag.med!=null?ag.med+' 岁':'—');
+  html += arow('年龄范围', (ag.min!=null&&ag.max!=null)?ag.min+' ~ '+ag.max+' 岁':'—');
+  html += '<div class="ash" style="margin-top:14px">分桶占比</div>';
+  ageOptions().slice(1).forEach(b=>{
+    const n=ag.buckets[b]||0, p=ag.known?Math.round(n/ag.known*100):0;
+    html += '<div class="adrow"><span class="al">'+b+'</span><div class="atrack"><i style="width:'+p+'%"></i></div><span class="an">'+n+' 人 · '+p+'%</span></div>';
+  });
+  html += '</div></div></div>';
+
+  /* 分社康 + 趋势 */
+  html += '<div class="sec"><div class="grid2">';
+  html += '<div class="panel"><h4>分社康</h4><div class="phint">'+layer+' · 各社康本月目标与完成情况</div>' + skTable(layer, sk) + '</div>';
+  html += '<div class="panel"><h4>近 30 日新增趋势</h4><div class="phint">'+layer+'每日新增</div><div id="cLayerTrend" class="chart"></div></div>';
+  html += '</div></div>';
+
+  /* 明细表 */
+  html += '<div class="sec"><div class="sec-h"><h3>明细</h3><span class="hint">'+layer+'全部记录（'+fmt(ps.total)+' 条）</span></div><div class="panel" style="padding:0"><div class="tblwrap">' + layerTable(layer, sk) + '</div></div></div>';
+
+  $('#app').innerHTML = html;
+  drawLayerTrend(layer, sk);
+  drawAgeDistChart(layer, sk);
+}
+
+function layerDesc(layer,sk){
+  if(layer==='触达') return (sk||'全部社康')+'的用户登记明细：来源（门诊/社区活动/企业活动/自行拓展）、性别、年龄段。';
+  if(layer==='体验') return (sk||'全部社康')+'的体验用户明细：体验登记、设备类型、体验周期、退订与续订情况。';
+  return (sk||'全部社康')+'的订阅用户明细：订阅产品、金额、周期、续订与退订情况。';
+}
+function goalCard(lbl, tgt, act, rate, sub){
+  const color = rate==null?'var(--ink3)':(rate>=100?'var(--ok)':rate>=80?'var(--warn)':'var(--bad)');
+  return '<div class="goalcard"><div class="h"><span class="l">'+lbl+'</span><span class="val">目标 <b>'+fmt(tgt)+'</b> · 已完成 <b>'+fmt(act)+'</b></span></div>'+
+    '<div class="track"><i style="width:'+Math.min(100,rate||0)+'%;background:'+color+'"></i></div>'+
+    '<div class="rate"><span>完成率 <b class="'+rateCls(rate)+'" style="color:'+color+'">'+(rate==null?'—':rate+'%')+'</b></span><span>'+sub+'</span></div></div>';
+}
+
+/* ===== 子渠道统计 ===== */
+function subChannels(layer, sk){
+  const rows = layerRows(layer,sk);
+  const base = SUB_DEFS.map(d=>({k:d.k,c:d.c,n:0}));
+  if(layer==='触达'){
+    rows.forEach(r=>{
+      const s=r[2];
+      if(s==='医生介绍') base[0].n++;
+      else if(s==='社区活动') base[1].n++;
+      else if(s==='企业活动') base[2].n++;
+      else base[3].n++;
+    });
+  } else if(layer==='体验'){
+    // 门诊=来源活动为空
+    rows.forEach(r=>{ if(!r[8]) base[0].n++; else base[1].n++; });
+  } else {
+    // 订阅按服务类型，暂无数据
+  }
+  return base;
+}
+
+/* ===== 分社康表 ===== */
+function skTable(layer, sk){
+  let head, rows;
+  if(layer==='触达'){
+    head='<tr><th>社康</th><th class="numc">累计登记</th><th class="numc">今日</th><th class="numc">本周</th><th class="numc">本月</th><th class="numc">本月目标</th><th class="numc">完成率</th></tr>';
+    rows = SK.map(s=>{
+      const p=periodStats('触达',s), g=monthGoal(s,'触达'), r=pct(g.actual,g.target);
+      return '<tr'+(s===sk?' style="background:#F0F6F3"':' style="cursor:pointer" onclick="go(\'#/layer/'+encodeURIComponent(layer)+'/'+encodeURIComponent(s)+'\')"')+'><td>'+s+'</td><td class="numc">'+fmt(p.total)+'</td><td class="numc">'+fmt(p.today)+'</td><td class="numc">'+fmt(p.week)+'</td><td class="numc">'+fmt(p.month)+'</td><td class="numc">'+fmt(g.target)+'</td><td class="numc"><b class="'+rateCls(r)+'">'+(r==null?'—':r+'%')+'</b></td></tr>';
+    });
+  } else if(layer==='体验'){
+    head='<tr><th>社康</th><th class="numc">体验累计</th><th class="numc">进行中</th><th class="numc">本月新增</th><th class="numc">本月目标</th><th class="numc">完成率</th></tr>';
+    rows = SK.map(s=>{
+      const p=periodStats('体验',s), g=monthGoal(s,'体验'), r=pct(g.actual,g.target);
+      return '<tr'+(s===sk?' style="background:#F0F6F3"':' style="cursor:pointer" onclick="go(\'#/layer/'+encodeURIComponent(layer)+'/'+encodeURIComponent(s)+'\')"')+'><td>'+s+'</td><td class="numc">'+fmt(p.total)+'</td><td class="numc">'+fmt(expActive(s))+'</td><td class="numc">'+fmt(p.month)+'</td><td class="numc">'+fmt(g.target)+'</td><td class="numc"><b class="'+rateCls(r)+'">'+(r==null?'—':r+'%')+'</b></td></tr>';
+    });
+  } else {
+    head='<tr><th>社康</th><th class="numc">订阅数</th><th class="numc">本月目标</th><th class="numc">完成率</th></tr>';
+    rows = SK.map(s=>{
+      const p=periodStats('订阅',s), g=monthGoal(s,'订阅'), r=pct(g.actual,g.target);
+      return '<tr style="cursor:pointer" onclick="go(\'#/layer/'+encodeURIComponent(layer)+'/'+encodeURIComponent(s)+'\')"><td>'+s+'</td><td class="numc">'+fmt(p.total)+'</td><td class="numc">'+fmt(g.target)+'</td><td class="numc"><b class="'+rateCls(r)+'">'+(r==null?'—':r+'%')+'</b></td></tr>';
+    });
+  }
+  return '<table class="tbl"><thead>'+head+'</thead><tbody>'+rows.join('')+'</tbody></table>';
+}
+
+/* ===== 明细表 ===== */
+function layerTable(layer, sk){
+  if(layer==='触达'){
+    const rows=DATA.reg.filter(r=>(!sk||r[0]===sk) && (curSrc==='全部'|| (curSrc==='自行拓展'? !['医生介绍','社区活动','企业活动'].includes(r[2]) : r[2]===curSrc))).slice().reverse();
+    const srcChip=s=> s==='医生介绍'?'<span class="chip b">门诊</span>':s==='社区活动'?'<span class="chip o">社区</span>':s==='企业活动'?'<span class="chip">企业</span>':'<span class="chip">自行拓展</span>';
+    let h='<tr><th>登记时间</th><th>社康</th><th>来源</th><th>性别</th><th>年龄</th></tr>';
+    let b=rows.map(r=>{
+      const ua=userAge('触达',r);
+      const ageTxt = ua.age!=null ? ua.age+'岁<span class="src" title="登记表年龄段 '+esc(ua.raw||'')+'">登记</span>' : '<span class="muted">—</span>';
+      return '<tr><td>'+esc(r[1])+'</td><td>'+esc(r[0])+'</td><td>'+srcChip(r[2])+'</td><td>'+esc(r[3])+'</td><td>'+ageTxt+'</td></tr>';
+    }).join('');
+    return '<table class="tbl"><thead>'+h+'</thead><tbody>'+(b||'<tr><td colspan="5">暂无数据</td></tr>')+'</tbody></table>';
+  }
+  if(layer==='体验'){
+    const rows=DATA.exp.filter(r=>!sk||r[0]===sk).slice().reverse();
+    const devChip=d=> d==='押金'?'<span class="chip b">押金</span>':d==='自备'?'<span class="chip">自备</span>':d==='购买'?'<span class="chip o">购买</span>':'—';
+    let h='<tr><th>用户</th><th>社康</th><th>分类</th><th>年龄</th><th>设备</th><th>体验产品</th><th>佩戴开始</th><th>佩戴结束</th><th>状态</th><th>退订原因</th></tr>';
+    let b=rows.map(r=>{
+      const st = r[6] ? '<span class="chip done">已结束</span>' : (r[5]?'<span class="chip run">体验中</span>':'<span class="chip plan">未开始</span>');
+      const ua=userAge('体验',r);
+      const ageTxt = ua.age!=null ? ua.age+'岁<span class="src" title="接口同步精确年龄">接口</span>' : '<span class="muted">—</span>';
+      return '<tr><td>'+esc(r[1])+'</td><td>'+esc(r[0])+'</td><td>'+esc(r[2])+'</td><td>'+ageTxt+'</td><td>'+devChip(r[4])+'</td><td>'+esc(r[3]||'—')+'</td><td>'+esc(r[5]||'—')+'</td><td>'+esc(r[6]||'—')+'</td><td>'+st+'</td><td>'+esc(r[7]||'—')+'</td></tr>';
+    }).join('');
+    return '<table class="tbl"><thead>'+h+'</thead><tbody>'+(b||'<tr><td colspan="9">暂无数据</td></tr>')+'</tbody></table>';
+  }
+  let h='<tr><th>社康</th><th>订阅产品</th><th>金额</th><th>开始</th><th>结束</th><th>续订</th><th>退订原因</th></tr>';
+  return '<table class="tbl"><thead>'+h+'</thead><tbody><tr><td colspan="7" style="text-align:center;color:var(--ink3)">暂无订阅数据</td></tr></tbody></table>';
+}
+
+/* ============ 视图：渠道详情 ============ */
+function renderChannel(sk){
+  crumbHTML([sk+' · 渠道详情']);
+  curSrc='全部';
+  const t=periodStats('触达',sk), e=periodStats('体验',sk), s=periodStats('订阅',sk);
+  const acts = DATA.act.filter(a=>a[0]===sk);
+  const subsT = subChannels('触达',sk), subsE = subChannels('体验',sk);
+
+  let html='';
+  html += '<div class="pagehead"><a class="back" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>返回总览</a>';
+  html += '<h2 class="serif">'+sk+' <span class="en">CHANNEL</span></h2>';
+  html += '<div class="sub">渠道漏斗：触达 '+fmt(t.total)+' → 体验 '+fmt(e.total)+' → 订阅 '+fmt(s.total)+'。下方为该社康子渠道与活动明细。</div>';
+  html += '<div class="note">'+M.noteTarget+'</div></div>';
+  html += ageFilterHTML();
+
+  /* 漏斗三数 */
+  html += '<div class="sec"><div class="kpis">';
+  const rows=[['触达',t,'#61BEAD'],['体验',e,'#2A9D8F'],['订阅',s,'#0E5B51']];
+  const monthNum = parseInt(DATA.meta.month);
+  rows.forEach(r=>{
+    const st=r[0], ps=r[1], c=r[2], g=monthGoal(sk,st);
+    let goalLabel='本月目标', goalVal=g.target;
+    if(st==='体验'){ const mv=mtMonth(sk+'-体验-月度', monthNum); if(mv!=null){ goalLabel='新增体验目标'; goalVal=mv; } }
+    const rate = goalVal>0 ? Math.round(g.actual/goalVal*100) : null;
+    html += '<div class="kpi" onclick="go(\'#/layer/'+encodeURIComponent(st)+'/'+encodeURIComponent(sk)+'\')" style="cursor:pointer">';
+    html += '<div class="l"><span class="dot" style="background:'+c+'"></span>'+st+' · 累计 <b>'+fmt(ps.total)+'</b><span style="margin-left:auto;font-size:11px">点击查看</span></div>';
+    html += '<div class="n num">'+fmt(ps.month)+'<small>本月新增</small></div>';
+    html += '<div class="go">'+goalLabel+' <b class="num">'+fmt(goalVal)+'</b> · 完成 <b class="num '+rateCls(rate)+'">'+fmt(g.actual)+'</b> · <span class="lvl '+rateCls(rate)+'">'+(rate==null?'—':rate+'%')+'</span></div>';
+    html += '</div>';
+  });
+  html += '</div></div>';
+
+  /* 子渠道 */
+  html += '<div class="sec"><div class="grid2">';
+  html += '<div class="panel"><h4>触达来源构成</h4><div class="phint">门诊=医生介绍，社区/企业/自行拓展按登记来源</div><div class="subgrid" style="grid-template-columns:repeat(2,1fr)">';
+  const srcVals=['医生介绍','社区活动','企业活动','自行拓展'];
+  subsT.forEach((sb,i)=>{
+    const sv=srcVals[i];
+    html += '<div class="subcard'+(sb.n?' click':'')+'"'+(sb.n?' onclick="drillSrc(\''+sk+'\',\''+sv+'\')"':'')+'><div class="nm"><i style="background:'+sb.c+'"></i>'+sb.k+'</div><div class="n num">'+fmt(sb.n)+'</div>'+(sb.n?'<div class="p">点击查看明细</div>':'')+'</div>';
+  });
+  html += '</div></div>';
+  html += '<div class="panel"><h4>体验构成</h4><div class="phint">门诊=来源活动为空</div><div class="subgrid" style="grid-template-columns:repeat(2,1fr)">';
+  subsE.forEach(sb=>{ html+='<div class="subcard'+(sb.n?' click':'')+'"'+(sb.n?' onclick="go(\'#/layer/体验/'+encodeURIComponent(sk)+'\')"':'')+'><div class="nm"><i style="background:'+sb.c+'"></i>'+sb.k+'</div><div class="n num">'+fmt(sb.n)+'</div></div>' });
+  html += '</div></div></div></div>';
+
+  /* 活动明细 */
+  html += '<div class="sec"><div class="sec-h"><h3>活动明细</h3><span class="hint">门诊活动=义诊/家医联动，另有社区活动、企业活动</span></div>';
+  if(acts.length===0){
+    html += '<div class="empty"><div class="t">暂无活动记录</div>该社康尚未录入活动。</div>';
+  } else {
+    html += '<div class="panel" style="padding:0"><div class="tblwrap"><table class="tbl"><thead><tr><th>活动名称</th><th>类型</th><th>状态</th><th>活动日期</th><th class="numc">目标参与</th><th class="numc">实际参与</th><th class="numc">成本</th><th>地点</th></tr></thead><tbody>';
+    acts.forEach(a=>{
+      const tchip = a[2]==='义诊'||a[2]==='家医联动'?'<span class="chip b">门诊</span>':a[2]==='社区活动'?'<span class="chip o">社区</span>':'<span class="chip">企业</span>';
+      const schip = a[3]==='已完成'?'<span class="chip done">已完成</span>':a[3]==='进行中'?'<span class="chip run">进行中</span>':'<span class="chip plan">计划中</span>';
+      html+='<tr><td>'+esc(a[1])+'</td><td>'+tchip+' '+esc(a[2])+'</td><td>'+schip+'</td><td>'+esc(a[4]||'—')+'</td><td class="numc">'+fmt(a[5])+'</td><td class="numc">'+fmt(a[6])+'</td><td class="numc">¥'+fmt(a[7])+'</td><td>'+esc(a[8]||'—')+'</td></tr>';
+    });
+    html += '</tbody></table></div></div>';
+  }
+  html += '</div>';
+
+  $('#app').innerHTML = html;
+}
+
+/* ============ 图表 ============ */
+function makeChart(id, option){
+  const el = document.getElementById(id);
+  if(!el || !window.echarts) return;
+  const ch = echarts.init(el);
+  ch.setOption(option);
+  new ResizeObserver(()=>ch.resize()).observe(el);
+  return ch;
+}
+function baseTooltip(){ return {confine:true} }
+
+/* 近30日趋势（总览） */
+function drawFunnel(){
+  const data = STAGE.map((st)=>{
+    const ps=periodStats(st);
+    const nosup = curAge!=='全部' && !ageSupported(st);
+    return {name:st, value:ps.total, nosup};
+  });
+  makeChart('cFunnel', {
+    tooltip:{confine:true, formatter:p=>{
+      const d=p.data;
+      return d.name+'用户：'+fmt(d.value)+' 人'+(d.nosup?'（未采集年龄，全量）':'');
+    }},
+    series:[{
+      type:'funnel', left:'5%', right:'5%', top:12, bottom:12, width:'62%',
+      minSize:'22%', maxSize:'98%', sort:'none', gap:2,
+      label:{show:true,position:'inside',formatter:p=>p.name+'用户\n'+fmt(p.value)+(p.data.nosup?'*':'')},
+      itemStyle:{borderColor:'#FFFFFF',borderWidth:1},
+      data:data.map(d=>({name:d.name,value:d.value,itemStyle:{color: d.nosup?'#CBD6CF':STAGE_COLOR[d.name]}}))
+    }]
+  });
+}
+function drawTrend(){
+  const regRows=layerRows('触达'), expRows=layerRows('体验');
+  const days=[], touch=[], exp=[];
+  for(let i=29;i>=0;i--){
+    const d=new Date(REF); d.setDate(d.getDate()-i);
+    const k = fmtLocal(d);
+    days.push(k.slice(5));
+    touch.push(regRows.filter(r=>r[1]===k).length);
+    exp.push(expRows.filter(r=>r[5]===k).length);
+  }
+  makeChart('cTrend', {
+    color:['#61BEAD','#1F8A7A'],
+    tooltip:{trigger:'axis',confine:true,valueFormatter:v=>v+' 人'},
+    legend:{data:['触达新增','体验新增'],bottom:0,icon:'circle',itemWidth:8,itemHeight:8},
+    grid:{left:8,right:16,top:18,bottom:44,containLabel:true},
+    xAxis:{type:'category',data:days,axisLine:{lineStyle:{color:'#CBD5CC'}},axisLabel:{color:'#8A9891',fontSize:11,interval:4},axisTick:{show:false}},
+    yAxis:{type:'value',splitLine:{lineStyle:{color:'#EDF1EB'}},axisLabel:{color:'#8A9891',fontSize:11}},
+    series:[
+      {name:'触达新增',type:'bar',data:touch,barWidth:'46%',itemStyle:{color:'#61BEAD',borderRadius:[3,3,0,0]}},
+      {name:'体验新增',type:'line',data:exp,smooth:true,symbol:'circle',symbolSize:4,lineStyle:{width:2,color:'#1F8A7A'},itemStyle:{color:'#1F8A7A'}}
+    ]
+  });
+}
+/* 本月触达完成率 by 社康 */
+function drawGoalBar(){
+  const sk=SK.map(x=>x.replace('社康',''));
+  const data=SK.map(x=>{const g=monthGoal(x,'触达');return {name:x.replace('社康',''),value:pct(g.actual,g.target)}});
+  const ov=monthGoal('总体','触达');
+  data.push({name:'总体',value:pct(ov.actual,ov.target)});
+  makeChart('cGoal', {
+    tooltip:{trigger:'axis',confine:true,valueFormatter:v=>v+'%'},
+    grid:{left:8,right:24,top:12,bottom:8,containLabel:true},
+    xAxis:{type:'value',max:100,splitLine:{lineStyle:{color:'#EDF1EB'}},axisLabel:{formatter:'{value}%',color:'#8A9891',fontSize:11}},
+    yAxis:{type:'category',data:data.map(d=>d.name),axisLine:{show:false},axisTick:{show:false},axisLabel:{color:'#57675F',fontSize:12}},
+    series:[{
+      type:'bar',data:data.map(d=>({value:d.value,itemStyle:{color: d.value>=100?'#2E8B57':(d.value>=80?'#C98A1B':'#2A9D8F'),borderRadius:[0,3,3,0]}})),
+      barWidth:16,label:{show:true,position:'right',formatter:p=>p.value+'%',color:'#57675F',fontSize:11}
+    }]
+  });
+}
+/* 层级 30日趋势 */
+function drawLayerTrend(layer, sk){
+  const rows=layerRows(layer,sk);
+  const days=[], vals=[];
+  for(let i=29;i>=0;i--){
+    const d=new Date(REF); d.setDate(d.getDate()-i);
+    const k = fmtLocal(d);
+    days.push(k.slice(5));
+    vals.push(rows.filter(r=>timeField(layer,r)===k).length);
+  }
+  const c=STAGE_COLOR[layer]||'#2A9D8F';
+  makeChart('cLayerTrend', {
+    tooltip:{trigger:'axis',confine:true,valueFormatter:v=>v+' 人'},
+    grid:{left:8,right:16,top:16,bottom:8,containLabel:true},
+    xAxis:{type:'category',data:days,axisLine:{lineStyle:{color:'#CBD5CC'}},axisLabel:{color:'#8A9891',fontSize:11,interval:4},axisTick:{show:false}},
+    yAxis:{type:'value',splitLine:{lineStyle:{color:'#EDF1EB'}},axisLabel:{color:'#8A9891',fontSize:11}},
+    series:[{type:'bar',data:vals,itemStyle:{color:c,borderRadius:[3,3,0,0]},barWidth:'55%'}]
+  });
+}
+
+/* ============ 启动 ============ */
+$('#metaDate').textContent = M.refDateCN;
+document.addEventListener('click', function(e){
+  const a = e.target.closest ? e.target.closest('#nav a[href^="#/"]') : null;
+  if(a){ e.preventDefault(); curSrc='全部'; go(a.getAttribute('href')); return; }
+  const t = e.target.closest ? e.target.closest('[data-age],[data-cat]') : null;
+  if(t){ if(t.hasAttribute('data-age')) curAge = t.getAttribute('data-age'); if(t.hasAttribute('data-cat')) curCat = t.getAttribute('data-cat'); route(); }
+});
+window.addEventListener('hashchange', route);
+loadSettings();
+route();
+function ageSyncStale(){
+  if(!S.token) return false;
+  if(Object.keys(S.ageSync).length===0) return true;
+  if(!S.ageSyncAt) return true;
+  return S.ageSyncAt.slice(0,10) < M.refDate;
+}
+if(ageSyncStale()) doSyncAges();
+</script>
+</body>
+</html>
