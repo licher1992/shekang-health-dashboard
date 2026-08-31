@@ -43,15 +43,26 @@ def build_summary(d):
     e_tot, e_mon, e_tod = len(exp), cnt(exp, 5), tod(exp, 5)
     s_tot, s_mon, s_tod = len(sub), cnt(sub, 0), tod(sub, 0)
 
-    def month_goal(stage):
+    def month_goal(stage, dim="总体"):
         t = a = 0
         for w in d["weekly"]:
-            if len(w) > 4 and w[0] == "总体" and w[2] == stage and w[1].startswith(M["month"]):
+            if len(w) > 4 and w[0] == dim and w[2] == stage and w[1].startswith(M["month"]):
                 t += w[3]; a += w[4]
         return t, a
 
     ct, ca = month_goal("触达")
     et, ea = month_goal("体验")
+
+    # 分社康明细：本月触达/体验新增 + 对应目标
+    sk_lines = []
+    for sk in d["sk"]:
+        tm = sum(1 for r in reg if r[0] == sk and len(r) > 1 and r[1][:7] == ms)
+        em = sum(1 for r in exp if r[0] == sk and len(r) > 5 and r[5][:7] == ms)
+        sct, sca = month_goal("触达", sk)
+        set_, sea = month_goal("体验", sk)
+        sk_lines.append(f"· {sk}：触达 {tm}/{sct} · 体验 {em}/{set_}")
+    sk_detail = "\n".join(sk_lines)
+
     ev_t = None
     for m in d["mt"]:
         if m[0] == "总体-体验":
@@ -80,6 +91,9 @@ def build_summary(d):
         "**■ 目标达成（本月）**",
         f"· 触达：目标 {ct} → 完成 {ca}（{pct(ca, ct)}）",
         f"· 体验新增：目标 {ev_t} → 完成 {ea}（{pct(ea, ev_t)}）",
+        "",
+        "**■ 分社康（本月触达/体验 · 目标）**",
+        sk_detail,
         alert,
         "",
         f"看板：{BOARD_URL}",
