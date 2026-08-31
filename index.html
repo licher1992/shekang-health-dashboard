@@ -290,7 +290,7 @@ table.tbl td.numc,table.tbl th.numc{text-align:right;font-variant-numeric:tabula
       <a href="#/settings" data-h="settings">设置</a>
     </nav>
     <div class="crumb" id="crumb"></div>
-    <div class="meta"><span class="dot"></span>数据截止 <b id="metaDate"></b> · 目标汇总同步至 <b id="metaTarget"></b></div>
+    <div class="meta"><span class="dot"></span>数据截止 <b id="metaDate"></b> · 拉取 <b id="metaSrcAt"></b> · 目标 <b id="metaTarget"></b></div>
   </div>
 </div>
 <div class="wrap">
@@ -1134,6 +1134,7 @@ function drawLayerTrend(layer, sk){
 
 /* ============ 启动 ============ */
 $('#metaDate').textContent = M.refDateCN;
+$('#metaSrcAt').textContent = (M.srcAt||'—');
 $('#metaTarget').textContent = M.targetThru || '—';
 document.addEventListener('click', function(e){
   const a = e.target.closest ? e.target.closest('#nav a[href^="#/"]') : null;
