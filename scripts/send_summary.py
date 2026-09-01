@@ -2,7 +2,7 @@
 """经营看板自动更新后，向飞书【MVP管理群】发送简短经营总结（目标达成情况等）。
 由 update_deploy.sh 在数据更新并推送后调用。
 """
-import json, os, subprocess, sys
+import json, os, re, subprocess, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 INDEX = os.path.join(ROOT, "index.html")
@@ -44,11 +44,15 @@ def build_summary(d):
     s_tot, s_mon, s_tod = len(sub), cnt(sub, 0), tod(sub, 0)
 
     def month_goal(stage, dim="总体"):
-        t = a = 0
+        # 周目标为当月累计值：取当月最后一周（W 编号最大）的目标与实际
+        best = None; bestN = -1
         for w in d["weekly"]:
             if len(w) > 4 and w[0] == dim and w[2] == stage and w[1].startswith(M["month"]):
-                t += w[3]; a += w[4]
-        return t, a
+                mm = re.search(r"W(\d+)", w[1])
+                n = int(mm.group(1)) if mm else 0
+                if n > bestN:
+                    bestN = n; best = w
+        return (best[3], best[4]) if best else (0, 0)
 
     ct, ca = month_goal("触达")
     et, ea = month_goal("体验")
@@ -66,7 +70,8 @@ def build_summary(d):
     ev_t = None
     for m in d["mt"]:
         if m[0] == "总体-体验":
-            ev_t = m[1]
+            idx = {8:1, 9:2, 10:3, 11:4}.get(int(M["month"].replace("月", "")))
+            ev_t = m[idx] if (idx is not None and idx < len(m)) else None
             break
     if ev_t is None:
         ev_t = et

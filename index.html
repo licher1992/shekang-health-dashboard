@@ -691,11 +691,15 @@ function weeklyRow(dim,week,stage){
   return hit?{target:hit[3],actual:hit[4]}:{target:0,actual:0};
 }
 function monthGoal(dim,stage){
-  let t=0,a=0;
+  // 目标汇总表周目标为当月累计值：取当月最后一周（W 编号最大）的目标与实际
+  let best=null,bestN=-1;
   DATA.weekly.forEach(w=>{
-    if(w[0]===dim && w[2]===stage && w[1].indexOf(M.month)===0){ t+=w[3]; a+=w[4]; }
+    if(w[0]===dim && w[2]===stage && w[1].indexOf(M.month)===0){
+      const mm=w[1].match(/W(\d+)/); const n=mm?parseInt(mm[1]):0;
+      if(n>bestN){bestN=n;best=w;}
+    }
   });
-  return {target:t,actual:a};
+  return best?{target:best[3],actual:best[4]}:{target:0,actual:0};
 }
 function mtMonth(name,month){ // 目标管理表月度目标（参考）
   const row = DATA.mt.find(m=>m[0]===name);
